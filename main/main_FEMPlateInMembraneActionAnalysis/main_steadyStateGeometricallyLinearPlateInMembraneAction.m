@@ -62,14 +62,15 @@ addpath('../../FEMPlateInMembraneActionAnalysis/solvers/',...
 
 % Define the path to the case
 pathToCase = '../../inputGiD/FEMPlateInMembraneActionAnalysis/';
-% caseName = 'cantileverBeamPlaneStress';
+caseName = 'cantileverBeamPlaneStress';
 % caseName = 'PlateWithAHolePlaneStress';
 % caseName = 'PlateWithMultipleHolesPlaneStress';
 % caseName = 'InfinitePlateWithAHolePlaneStress';
-caseName = 'curvedPlateTipShearPlaneStress';
+% caseName = 'curvedPlateTipShearPlaneStress';
+%caseName = 'test1';
 
 % Parse the data from the GiD input file
-[strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,analysis,parameters,nLinearAnalysis,strDynamics] = ...
+[strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,analysis,parameters,nLinearAnalysis,strDynamics] = ...
     parse_StructuralModelFromGid(pathToCase,caseName,'outputEnabled');
 
 %% GUI
