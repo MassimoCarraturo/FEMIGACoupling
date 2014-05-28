@@ -17,9 +17,11 @@
 %   _______________________________________________________________       %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [K,F,minElSize] = computeStiffMtxAndLoadVctIGAPlateInMembraneActionLinear...
+function [K,F,minElSize] = computeStiffMtxAndLoadVctIGA_FEMPlateInMembraneActionLinear...
     (dHat,dHatSaved,dHatDot,dHatDotSaved,DOFNumbering,BSplinePatch,Fl,...
-    transientAnalysis,t,parameters,bodyForces,int)
+    transientAnalysis,t,parameters,bodyForces,int,uFEM,uSavedFEM,uDotFEM,uDotSavedFEM, ...
+    DOFNumberingFEM,strMsh,analysisFEM,FFEM,strDynamics,...
+    parametersFEM)
 %% Function documentation
 %
 % Returns the linear master stiffness matrix and the complete right-hand 
@@ -146,6 +148,38 @@ end
 K = zeros(noDOFs,noDOFs);
 FBody = zeros(noDOFs,1);
 
+% FEM inputs
+
+% Number of nodes in the mesh
+nNodes = length(strMsh.nodes(:,1));
+
+% Number of DOFs in the mesh
+nDOFsFEM = 2*nNodes;
+
+% Number of nodes at the element level
+nNodesElFEM = 3;
+
+% Number of DOFs at the element level
+nDOFsElFEM = 2*nNodesElFEM;
+
+
+% Compute the material matrix for the given problem
+if strcmp(analysisFEM.type,'PLANE_STRESS')
+    preFactorFEM = parametersFEM.E/(1-parametersFEM.nue^2);
+    CFEM = preFactorFEM*[1             parametersFEM.nue 0
+                   parametersFEM.nue 1              0
+                   0              0             (1-parametersFEM.nue)/2];
+elseif strcmp(analysisFEM.physics,'PLANE_STRAIN')
+    preFactorFEM = parametersFEM.E*(1-parametersFEM.nue)/(1+parametersFEM.nue)/(1-2*parametersFEM.nue);
+    CFEM = preFactorFEM*[1                                 parametersFEM.nue/(1-parametersFEM.nue) 0
+                   parametersFEM.nue/(1-parametersFEM.nue) 1                                 0
+                   0                                 0                                 (1-2*parametersFEM.nue)/2/(1-parametersFEM.nue)];
+end
+    
+% Initialize output array
+KFEM = zeros(nDOFsFEM,nDOFsFEM);
+
+
 %% 1. Choose an integration rule
 
 % Select the integration scheme
@@ -160,6 +194,14 @@ end
 % Issue the Gauss Point coordinates and weights
 [xiGP,xiGW] = getGaussPointsAndWeightsOverUnitDomain(xiNGP);
 [etaGP,etaGW] = getGaussPointsAndWeightsOverUnitDomain(etaNGP);
+
+% FEM
+if strcmp(int.type,'default')
+    nGP = 1;
+elseif strcmp(int.type,'manual')
+    nGP = int.nGP;
+end
+[GP,GW] = getGaussRuleOnCanonicalTriangle(nGP);
 
 %% 2. loop over all elements (knot spans)
 for j = q+1:meta-q-1
@@ -281,7 +323,56 @@ for j = q+1:meta-q-1
     end
 end
 
+% FEM
+for counterEl = 1:length(strMsh.elements(:,1))
+    %% 2i. Get the element in the mesh
+    element = strMsh.elements(counterEl,:);
+    
+    %% 2ii. Get the nodes in the element
+    node1 = strMsh.nodes(element(1,1),:);
+    node2 = strMsh.nodes(element(1,2),:);
+    node3 = strMsh.nodes(element(1,3),:);
+    
+    %% 2iii. Create an Element Freedome Table (EFT)
+    EFT = zeros(nDOFsElFEM,1);
+    for counterEFT = 1:nNodesElFEM
+        EFT(2*counterEFT-1) = 2*element(1,counterEFT)-1;
+        EFT(2*counterEFT) = 2*element(1,counterEFT);
+    end
+    
+    %% 2iv. Loop over all the quadrature points
+    for counterGP = 1:nGP
+        %% 2iv.1. Transform the Gauss Point location from the parameter to the physical space
+        xGP = GP(counterGP,1)*node1(1,:) + GP(counterGP,2)*node2(1,:) + (1-GP(counterGP,1)-GP(counterGP,2))*node3(1,:);
+        
+        %% 2iv.2. Compute the basis functions and their derivatives at the Gauss Point
+        [dN,detJxxi] = computeCST2DBasisFunctionsAndFirstDerivatives(node1,node2,node3,xGP(1,1),xGP(1,2));
+        
+        %% 2iv.3. Form the basis functions matrix at the Gauss Point
+        N = [dN(1,1) 0       dN(2,1) 0       dN(3,1) 0
+             0       dN(1,1) 0       dN(2,1) 0       dN(3,1)];
+        
+        %% 2iv.4. Form the B-Operator matrix for the plate in membrane action problem
+        B = [dN(1,2) 0       dN(2,2) 0       dN(3,2) 0
+             0       dN(1,3) 0       dN(2,3) 0       dN(3,3)
+             dN(1,3) dN(1,2) dN(2,3) dN(2,2) dN(3,3) dN(3,2)];
+         
+        %% 2iv.5. Compute the element stiffness matrix at the Gauss Point and assemble to master stiffness matrix via the EFT
+        KFEM(EFT,EFT) = KFEM(EFT,EFT) + (B'*CFEM*B)*detJxxi*GW(counterGP);
+        
+        %% 2iv.6. Compute the element load vector due to body forces and assemble to master load vector via the EFT
+        bF = bodyForces(xGP(1,1),xGP(1,2),xGP(1,3));
+        FFEM(EFT) = FFEM(EFT) + N'*bF(1:2,1)*detJxxi*GW(counterGP);
+    end
+end
+
+
 %% 3. Add the body force vectors
 F = FBody + Fl;
+
+F = [FFEM F];
+
+%% 5. Generate Sparse Stiffness Matrix
+K=blkdiag(KFEM,KIGA);
 
 end

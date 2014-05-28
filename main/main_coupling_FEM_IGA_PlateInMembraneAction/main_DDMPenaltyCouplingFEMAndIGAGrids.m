@@ -32,6 +32,7 @@ clear;
 
 %% Includes 
 addpath('../../coupling_FEM_IGA/Solver/');
+addpath('../../coupling_FEM_IGA/Solution/');
 % Add general math functions
 addpath('../../generalMath/');
 
@@ -301,7 +302,7 @@ Fl2 = computeLoadVctLineIGAPlateInMembraneAction(Fl2,xib,etab,p2,q2,Xi2,Eta2,CP2
 pathToOutput = '../../outputVTK/FEMPlateInMembraneActionAnalysis/';
 
 %% Compute the load vector FEM
-bodyForces = @computeConstantVecrticalBodyForceVct;
+bodyForcesFEM = @computeConstantVecrticalBodyForceVct;
 t = 0;
 F = computeLoadVctFEMPlateInMembraneAction(strMsh,analysis,NBC,t,intLoad,'outputEnabled');
 %% Find the degrees of freedom over the coupled interfaces
@@ -321,7 +322,7 @@ etacoup2 = [0 1];
 
 %% Solve the system
 [dHat,FComplete,minElSize] = solve_IGA_FEM_PlateInMembraneActionLinear(p2,Xi2,q2,Eta2,CP2,isNURBS2,parameters,Fl2,bodyForcesIGA,homDOFs,...
-    inhomDOFs,valuesInhomDOFs,int2,'outputEnabled',strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,F,bodyForces,...
+    inhomDOFs,valuesInhomDOFs,int2,'outputEnabled',strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,F,bodyForcesFEM,...
     analysis,parameters,nLinearAnalysis,strDynamics,intDomain,caseName,pathToOutput,'outputEnabled');
 
 
