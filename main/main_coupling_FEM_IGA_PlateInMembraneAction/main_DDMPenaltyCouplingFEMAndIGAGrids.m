@@ -320,15 +320,11 @@ etacoup2 = [0 1];
 
 
 
+
 %% Solve the system
 [dHat,FComplete,minElSize] = solve_IGA_FEM_PlateInMembraneActionLinear(p2,Xi2,q2,Eta2,CP2,isNURBS2,parameters,Fl2,bodyForcesIGA,homDOFs,...
     inhomDOFs,valuesInhomDOFs,int2,'outputEnabled',strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,F,bodyForcesFEM,...
     analysis,parameters,nLinearAnalysis,strDynamics,intDomain,caseName,pathToOutput,'outputEnabled');
-
-
-
-
-
 
 
 

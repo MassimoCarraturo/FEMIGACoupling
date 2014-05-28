@@ -201,12 +201,8 @@ for cpj = 1:neta
 end
 
 % Get a sequencial numbering of the unconstained DOFs into a vector
-freeDOFsFEM = zeros(length(F),1);
-for i=1:length(F)
-    freeDOFsFEM(i,1) = i;
-end
 freeDOFs = zeros(length(Fl)+length(F),1);
-for i=length(F)+1:length(Fl)+length(F)
+for i=1:length(Fl)+length(F)
     freeDOFs(i,1) = i;
 end
 freeDOFs(ismember(freeDOFs,homDOFs)) = [];
