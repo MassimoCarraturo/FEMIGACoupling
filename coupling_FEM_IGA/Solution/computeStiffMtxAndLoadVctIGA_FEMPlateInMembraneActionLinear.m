@@ -145,7 +145,7 @@ elseif abs(CP(nxi,1,1)-CP(nxi,neta,1))>tol
 end
                                    
 % Initialize output arrays
-K = zeros(noDOFs,noDOFs);
+KIGA = zeros(noDOFs,noDOFs);
 FBody = zeros(noDOFs,1);
 
 % FEM inputs
@@ -309,7 +309,7 @@ for j = q+1:meta-q-1
                     %% 2iv.9. Add the contribution from the Gauss Point and assemble to the global matrices/vectors
                     
                     % For the stiffness matrix
-                    K(EFT,EFT) = K(EFT,EFT) + Ke*elAreaSizeOnGP;
+                    KIGA(EFT,EFT) = KIGA(EFT,EFT) + Ke*elAreaSizeOnGP;
                     
                     % For the load vector
                     FBody(EFT) = FBody(EFT) + Fe*elAreaSizeOnGP;
@@ -368,9 +368,9 @@ end
 
 
 %% 3. Add the body force vectors
-F = FBody + Fl;
+FIGA = FBody + Fl;
 
-F = [FFEM F];
+F = [FFEM; FIGA];
 
 %% 5. Generate Sparse Stiffness Matrix
 K=blkdiag(KFEM,KIGA);
