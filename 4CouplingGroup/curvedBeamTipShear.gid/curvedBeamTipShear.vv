@@ -1,0 +1,41 @@
+BeginZE C:\Users\Dusty!\Desktop\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
+   x -3.1493556499481201 5.2149252891540527
+   y 6.3837714195251465 2.7091329097747803
+   z -15 15
+   e 5
+   v -0.021959386765956879 -0.18974274396896362 -0.17416466772556305
+   r 0.96601355075836182
+   m 0.8673287034034729 0.34482410550117493 -0.35893902182579041 0 -0.32815757393836975 0.93836891651153564 0.10851909220218658 0 0.37423723936080933 0.023666832596063614 0.92703092098236084 0 0 0 0 1
+   c 0 0 0
+   pd 0
+   pno 0
+   pfo 0
+   pf 4
+   pv 0
+   NowUse 1
+   DrawingType 0
+   LightVector 90 90 150 0
+   OGLShadow(UseShadows) 0
+   OGLShadow(RenderMode) RenderNice
+   OGLShadow(ShadowBias) -0.002
+   OGLShadow(AmbientShadows) 1
+   OGLShadow(UseFBO) 1
+   OGLShadow(FBOSize) 2048
+   OGLShadow(DimmedLightFactor) 0.02
+   OGLStereo(UseStereo) 0
+   OGLStereo(RelativeEyeDistance) 1
+   OGLStereo(FlipEyes) 0
+   OGLStereo(StereoMode) AnaglyphColors
+   OGLStereo(EyeDistance) 0.075
+   OGLStereo(LeftEyeDistance) 1 0 0 1
+   OGLStereo(RightEyeDistance) 0 1 1 1
+EndZE C:\Users\Dusty!\Desktop\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
+
+BeginMirror
+   Mirror 0 Angle 0.0 AngleFake -15.0 SizeFactor 2.0 HeightOffset 0.25 Color #d9e5f24d Backlight Off EdgeStyle No Type Scene DrawMode Mirror
+EndMirror
+
+BeginInfo
+eJzNU01v2kAQvftXzDFIDjIEUmRVlaA4yCofERCSntBiD2SV9a61uw6mUf57Z9egHlr1ULVSL/Z4Pt7se2+9zsSg3W93OrB+oeCq+WgFwVodBHTaH2Jg5gVz2CsNDA4oUfMMNMocNeowGPrqPa9RUEvBLORoMs1Ly5WEK+j2W3EAAJPzJC9KgQVKy1xD2EzeNZPdfuhax6raCRxV+z3qGE5ofHZlaaFqsj6xnIyGIXxWRakM99tQMhrM4WrDjWWtEMaaHcEqeOQyV8cQFiXKyRRMVZZK2xAczIPh8gDdHiEJ4rjj1sQwIIZ5SK+DRpQu2IkKgckcImCifGbhj9kIhllWFZXwlM4IUYMQXRCi3yHcdGGMpX32s75n4PjKjIsRZVwjLalqLjjTJ9h5EZp0BJWzQrATiR3V1/u65QHU6yVZR9f1vgWlYBJNMFGWgP+xYZCp8vT3TSKZ/tik296vXOrcNhj0PoNQ9H8YFXgdhPdik8zHi2UMbzOeaWXU3pIQmuTxXN690NSSLBPXNBmnF/fem+nlKl3MiW270468Yenqfjr8Cun8brGcDde++uY5kRwwCBs1XODFoLdXAqKQbovjf9MNwTTEXdX4nxOkavuNHx8/QdJITaLdaSUtNNfDVafpLF2vaKH7mLEa1ljbSiOs+DekU0bd3qWSNFfPQCpzniE51o16g5+qG9T2XO7fuurwlXHh7hm88pwOVmChyA/jF0QwG50smjMML6oCjkq/uLPKqtihBrUHPIPH0CfvvgSeWPK0TuZOTH/8yXRLie3uoNklLplA+sHyrW04ufxjOt+aIyu3z1xawplMn2Jv6ypZkjdxsKAn2UEnu4TkDMyS+YNLfQf9RMDv
+
+EndInfo
