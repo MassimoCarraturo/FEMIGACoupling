@@ -1,0 +1,91 @@
+BOOK:Constraints
+NUMBER: 1 CONDITION: Fluid-Dirichlet
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: X-Constraint#CB#(0,1)
+VALUE: 0
+HELP: not yet included
+QUESTION: X-Value
+VALUE: 0.0
+QUESTION: Y-Constraint#CB#(0,1)
+VALUE: 0
+QUESTION: Y-Value
+VALUE: 0.0
+QUESTION: Z-Constraint#CB#(0,1)
+VALUE: 0
+QUESTION: Z-Value
+VALUE: 0.0
+QUESTION: P-Constraint#CB#(0,1)
+VALUE: 0
+QUESTION: P-Value
+VALUE: 0.0
+END CONDITION
+NUMBER: 2 CONDITION: Structure-Dirichlet
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: X-Constraint#CB#(0,1)
+VALUE: 0
+HELP: not yet included
+QUESTION: X-Value
+VALUE: 0.0
+QUESTION: Y-Constraint#CB#(0,1)
+VALUE: 0
+QUESTION: Y-Value
+VALUE: 0.0
+QUESTION: Z-Constraint#CB#(0,1)
+VALUE: 0
+QUESTION: Z-Value
+VALUE: 0.0
+END CONDITION
+NUMBER: 3 CONDITION: FSI-Interface
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: X-Constraint#CB#(0,1)
+VALUE: 0
+HELP: not yet included
+QUESTION: X-Value
+VALUE: 0.0
+QUESTION: Y-Constraint#CB#(0,1)
+VALUE: 0
+QUESTION: Y-Value
+VALUE: 0.0
+QUESTION: Z-Constraint#CB#(0,1)
+VALUE: 0
+QUESTION: Z-Value
+VALUE: 0.0
+END CONDITION
+BOOK:Loads
+NUMBER: 4 CONDITION: Structure-Force
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: ForceType#CB#(boundaryLoad,whatever)
+VALUE: boundaryLoad
+QUESTION: FunctionHandleToForceComputation
+VALUE: functionHandle
+END CONDITION
+BOOK:Domains
+NUMBER: 5 CONDITION: Fluid-Nodes
+CONDTYPE: over surfaces
+CONDMESHTYPE: over nodes
+TITLE: Fluid
+END CONDITION
+NUMBER: 6 CONDITION: Structure-Nodes
+CONDTYPE: over surfaces
+CONDMESHTYPE: over nodes
+TITLE: Solid
+END CONDITION
+NUMBER: 7 CONDITION: Fluid-Elements
+CONDTYPE: over surfaces
+TITLE: Fluid
+END CONDITION
+NUMBER: 8 CONDITION: Structure-Elements
+CONDTYPE: over surfaces
+TITLE: Solid
+END CONDITION
+BOOK:Boundaries
+NUMBER: 9 CONDITION: Structure-Boundary
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: BoundaryType#CB#(boundary,whatever)
+VALUE: boundary
+END CONDITION
