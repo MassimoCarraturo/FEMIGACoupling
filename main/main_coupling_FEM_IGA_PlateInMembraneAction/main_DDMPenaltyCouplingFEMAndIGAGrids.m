@@ -33,6 +33,8 @@ clear;
 %% Includes 
 addpath('../../coupling_FEM_IGA/Solver/');
 addpath('../../coupling_FEM_IGA/Solution/');
+addpath('../../coupling_FEM_IGA/Graphics/');
+
 % Add general math functions
 addpath('../../generalMath/');
 
