@@ -107,7 +107,7 @@ Eta2 = [0 0 1 1];
 % This is modelled with the classical Finite Elements
 % Define the path to the case
 pathToCase = '../../inputGiD/FEM_IGA_TestCase/';
-caseName = 'curvedBeamTipShear_tryme';
+caseName = 'curvedBeamTipShear';
 
 % Parse the data from the GiD input file
 [strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,analysis,parameters,nLinearAnalysis,strDynamics] = ...
