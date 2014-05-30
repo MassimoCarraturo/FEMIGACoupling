@@ -326,6 +326,11 @@ etacoup2 = [0 1];
     inhomDOFs,valuesInhomDOFs,int2,'outputEnabled',strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,F,bodyForcesFEM,...
     analysis,parameters,nLinearAnalysis,strDynamics,intDomain,caseName,pathToOutput,'outputEnabled');
 
+%% Postprocessing
+graph.visualization.geometry = 'reference_and_current';
+
+graph.index = plot_FEM_IGA_currentConfigurationAndResultants(p2,q2,Xi2,Eta2,CP2,isNURBS2,homDOFs,parameters,Fl2,dHat,graph,'outputEnabled',...
+    strMsh,homDBC,dHat,parameters,analysis);
 
 
 
