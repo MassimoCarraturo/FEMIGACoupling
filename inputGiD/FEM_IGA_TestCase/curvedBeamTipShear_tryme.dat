@@ -377,12 +377,12 @@ STRUCTURE_ELEMENTS
 200	88	97	107
 
 STRUCTURE_DIRICHLET_NODES
-       4 0.0  0.0  0.0  
-      33 0.0  0.0  0.0  
-      54 0.0  0.0  0.0  
-      65 0.0  0.0  0.0  
-      86 0.0  0.0  0.0  
-     107 0.0  0.0  0.0  
+       3 0.0  0.0  0.0  
+      32 0.0  0.0  0.0  
+      53 0.0  0.0  0.0  
+      64 0.0  0.0  0.0  
+      85 0.0  0.0  0.0  
+     106 0.0  0.0  0.0  
 STRUCTURE_FORCE_NODES
 STRUCTURE_INTERFACE_NODES
        2 boundary
