@@ -17,7 +17,7 @@
 %   _______________________________________________________________       %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [K,F,minElSize] = computeStiffMtxAndLoadVctIGA_FEMPlateInMembraneActionLinear...
+function [KFEM,KIGA,F,minElSize] = computeStiffMtxAndLoadVctIGA_FEMPlateInMembraneActionLinear...
     (dHat,dHatSaved,dHatDot,dHatDotSaved,DOFNumbering,BSplinePatch,Fl,...
     transientAnalysis,t,parameters,bodyForces,int,uFEM,uSavedFEM,uDotFEM,uDotSavedFEM, ...
     DOFNumberingFEM,strMsh,analysisFEM,FFEM,strDynamics,...
@@ -372,7 +372,6 @@ FIGA = FBody + Fl;
 
 F = [FFEM; FIGA];
 
-%% 5. Generate Sparse Stiffness Matrix
-K=blkdiag(KFEM,KIGA);
+
 
 end

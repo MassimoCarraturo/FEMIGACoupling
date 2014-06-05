@@ -109,7 +109,7 @@ Eta2 = [0 0 1 1];
 % This is modelled with the classical Finite Elements
 % Define the path to the case
 pathToCase = '../../inputGiD/FEM_IGA_TestCase/';
-caseName = 'curvedBeamTipShear';
+caseName = 'curvedBeamTipShear_tryme';
 
 % Parse the data from the GiD input file
 [strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,analysis,parameters,nLinearAnalysis,strDynamics] = ...
@@ -182,6 +182,9 @@ parameters2.nue = 0.0;
 
 % Plate thickness
 parameters2.t = 1;
+
+%Penalty Term
+Beta = 10E+4;
 
 %% GUI
 
@@ -276,6 +279,9 @@ tp2 = b;  tq2 = b;
 n2 = ceil(7*2);
 [Xi2,Eta2,CP2] = knotRefineUniformlyBSplineSurface(p2,Xi2,q2,Eta2,CP2,n2,n2,'outputEnabled');
 
+lng = length(Xi2);
+XiB = Xi2(lng);
+
 %% Dirichlet and Neumann boundary conditions
 
 % 1st patch :
@@ -324,8 +330,8 @@ etacoup2 = [0 1];
 
 
 %% Solve the system
-[dHat,FComplete,minElSize] = solve_IGA_FEM_PlateInMembraneActionLinear(p2,Xi2,q2,Eta2,CP2,isNURBS2,parameters,Fl2,bodyForcesIGA,homDOFs,...
-    inhomDOFs,valuesInhomDOFs,int2,'outputEnabled',strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,F,bodyForcesFEM,...
+[dHat,FComplete,minElSize] = solve_IGA_FEM_PlateInMembraneActionLinear(Beta,XiB,p2,Xi2,q2,Eta2,CP2,isNURBS2,parameters,Fl2,bodyForcesIGA,homDOFs,...
+    inhomDOFs,valuesInhomDOFs,int2,'outputEnabled',strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,F,bodyForcesFEM,...
     analysis,parameters,nLinearAnalysis,strDynamics,intDomain,caseName,pathToOutput,'outputEnabled');
 
 %% Postprocessing
