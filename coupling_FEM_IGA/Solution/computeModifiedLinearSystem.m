@@ -207,8 +207,8 @@ for j = q+1:meta-q-1
             
             % Compute the EFT
             for cpj = j-q:j
-                    EFT(k)   = DOFNumbering(cpj,1);
-                    EFT(k+1) = DOFNumbering(cpj,2);
+                    EFT(k)   = DOFNumbering(1,cpj,1);    % DOFNum....(1,cpj,1) first is 1 because 
+                    EFT(k+1) = DOFNumbering(1,cpj,2);    % we fix xi at xi=0 and run over eta
                     
                     % update counter
                     k = k + 2;
