@@ -109,7 +109,7 @@ Eta2 = [0 0 1 1];
 % This is modelled with the classical Finite Elements
 % Define the path to the case
 pathToCase = '../../inputGiD/FEM_IGA_TestCase/';
-caseName = 'curvedBeamTipShear_tryme';
+caseName = 'curvedBeamTipShear_new';
 
 % Parse the data from the GiD input file
 [strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,analysis,parameters,nLinearAnalysis,strDynamics] = ...
@@ -280,7 +280,7 @@ n2 = ceil(7*2);
 [Xi2,Eta2,CP2] = knotRefineUniformlyBSplineSurface(p2,Xi2,q2,Eta2,CP2,n2,n2,'outputEnabled');
 
 lng = length(Xi2);
-XiB = Xi2(lng);
+XiB = Xi2(1);
 
 %% Dirichlet and Neumann boundary conditions
 
@@ -326,7 +326,13 @@ cb2 = [];
 xicoup2 = [0 0];   
 etacoup2 = [0 1];
 
+%% Projection
 
+% P = strMsh.nodes(2,:)';
+% 
+% [xiP,etaP,Projected,flag,noIterations] = ...
+%                         computeNearestPointProjectionOnBSplineSurface...
+%                         (P,p,Xi,q,Eta,CP,isNURBS,xi0,eta0,newtonRaphson)
 
 
 %% Solve the system

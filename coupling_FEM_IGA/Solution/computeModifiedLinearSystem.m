@@ -65,6 +65,8 @@ function [K] = computeModifiedLinearSystem...
 %
 % 1. Choose an integration rule
 %
+% 1.1 projections
+%
 % 2. loop over all elements (knot spans)
 % ->
 %    2i. Compute the determinant of the Jacobian to the transformation from the NURBS space (xi-eta) to the integration domain [-1,1]x[-1,1] 
@@ -109,7 +111,7 @@ isNURBS = BSplinePatch.isNURBS;
 
 % Compute the number of knots and Control Points in both parametric
 % directions
-meta = length(Eta);
+
 neta = length(CP(1,:,1));
 nxi = length(CP(:,1,1));
 
@@ -144,6 +146,10 @@ nNodesElFEM = 3;
 % Number of DOFs at the element level
 nDOFsElFEM = 2*nNodesElFEM;
 
+% Initializations
+RMatrix = zeros(2,noDOFsLoc);
+newtonRaphson.eps = 1e-9;
+newtonRaphson.maxIt = 100;
 
 % Compute the material matrix for the given problem
 if strcmp(analysisFEM.type,'PLANE_STRESS')
@@ -182,8 +188,29 @@ elseif strcmp(int.type,'manual')
 end
 [GP,GW] = getGaussRuleOnCanonicalTriangle(nGP);
 
+%% 1.1 Do the projection to find Inserted Knots
+P=zeros(1,3); 
+projected=zeros(length(IBC.nodes),2); 
+for i=1:length(IBC.nodes)
+xp=strMsh.nodes(IBC.nodes(i),1);
+ yp=strMsh.nodes(IBC.nodes(i),2);
+ zp=strMsh.nodes(IBC.nodes(i),3);
+P = [xp;yp;zp];
+                    xi0 = XiB;
+                    eta0 = 0;
+                    [xiP,etaP,Projected,flag,noIterations] = ...
+                        computeNearestPointProjectionOnBSplineSurface(P,p,Xi,q,Eta,CP,isNURBS,xi0,eta0,newtonRaphson);
+                    projected(i,1)=xiP;
+                    projected(i,2)=etaP;
+end
+
+ Eta_Coupled = sort([Eta' ; projected(:,2)]);
+ %Xi_Coupled = sort([Xi' ; projected(:,1)]);
+ meta = length(Eta_Coupled);
+ 
+
 %% 2. loop over all elements (knot spans)
-for j = q+1:meta-q-1
+for j = 1:meta
     
         % check if we are in a non-zero knot span
         if  Eta(j+1)~=Eta(j)
@@ -204,7 +231,7 @@ for j = q+1:meta-q-1
             
             % Initialize counter
             k = 1;
-            
+         
             % Compute the EFT
             for cpj = j-q:j
                     EFT(k)   = DOFNumbering(1,cpj,1);    % DOFNum....(1,cpj,1) first is 1 because 
@@ -214,8 +241,10 @@ for j = q+1:meta-q-1
                     k = k + 2;
             end
             
-            %% 2iii. Initialize element area size
+            %% 2iii. Initialize element area size and knot span size
             elLengthSize = 0;
+            
+            xiSpan = findKnotSpan(Xi(1),Xi,nxi);
             
             %% 2iv. Loop over all Gauss Points
             for keta = 1:length(etaGP)
@@ -228,7 +257,6 @@ for j = q+1:meta-q-1
                     GW = etaGW(keta);
                 
                     %% 2iv.3. Find the correct spans where,eta lie in
-                    xiSpan = nxi-1;
                     etaSpan = findKnotSpan(eta,Eta,neta);
                 
                     %% 2iv.4. Compute the IGA basis functions and their first derivatives at the quadrature point
@@ -238,8 +266,7 @@ for j = q+1:meta-q-1
                     %% 2iv.5. Compute the determinant of the Jacobian to the transformation from the physical space (x-y) to the NURBS parameter space (xi-eta) and the physical coordinates of the Gauss point
                 
                     % Initialize Jacobian
-%                     Jxxi = zeros(2,2);
-                    Jxxi = 0.0;
+                    Jxxi = zeros(1,2);
                     
                     % Initialize Cartesian coordinates
                     x = 0;
@@ -252,43 +279,47 @@ for j = q+1:meta-q-1
                     % Loop over all the non-zero contributions at the span
                     % under study
                     for c = 0:q
-                        
+                        for b = 0:p
                             % Update counter
                             k = k + 1;
                         
                             % Compute recursively the entries of the Jacobian
 %                             Jxxi(1,1) = Jxxi(1,1) + CP(p,j-q+c,1)*dR(k,2);
 %                             Jxxi(1,2) = Jxxi(1,2) + CP(p,j-q+c,2)*dR(k,2);
-%                             Jxxi(2,1) = Jxxi(2,1) + CP(p,j-q+c,1)*dR(k,3);
-                            Jxxi = Jxxi + CP(1,j-q+c,2)*dR(k,3);
+                            Jxxi(1,1) = Jxxi(1,1) + CP(xiSpan-p+b,j-q+c,1)*dR(k,3);
+                            Jxxi(1,2) = Jxxi(1,2) + CP(xiSpan-p+b,j-q+c,2)*dR(k,3);
                             
                             % Compute the Cartesian coordinates of the
                             % Gauss Point
-                            x = x + CP(p,j-q+c,1)*dR(k,1);
-                            y = y + CP(p,j-q+c,2)*dR(k,1);
-                            z = z + CP(p,j-q+c,3)*dR(k,1);
-                        
+                            x = x + CP(xiSpan-p+b,j-q+c,1)*dR(k,1);
+                            y = y + CP(xiSpan-p+b,j-q+c,2)*dR(k,1);
+                            z = z + CP(xiSpan-p+b,j-q+c,3)*dR(k,1);
+                        end
                     end
+              
                 
                     % Compute the determinant of the Jacobian
-                    detJxxi = det(Jxxi);
+                    detJxxi = norm(Jxxi);
                     
                     
                     %% 2iv.6. Compute the element length on the Gauss Point
                     elLengthSizeOnGP = abs(detJxxi)*abs(detJxiu)*GW;
                     elLengthSize = elLengthSize + elLengthSizeOnGP;
                 
-                    %% 2iv.7. Compute the element stiffness matrix at the quadrature point multiplying also via the determinants of the Jacobians to the two transformations and the quadrature weight
-                    b = bodyForces(x,y,z,t);
-                    [Ke,Fe] = computeElStiffMtxAndLoadVctPlateInMembraneActionLinear(nCPsLoc,dR(:,1),dR(:,2:3),Jxxi,D,b(1:2,1));
+                    %% 2iv.7. 
+                    for counter = 1:nCPsLoc
+                        RMatrix(1,2*counter-1) = dR(counter,1);
+                        RMatrix(2,2*counter) = dR(counter,1);
+                    end
+                    
+%                     b = bodyForces(x,y,z,t);
+%                     [Ke,Fe] = computeElStiffMtxAndLoadVctPlateInMembraneActionLinear(nCPsLoc,dR(:,1),dR(:,2:3),Jxxi,D,b(1:2,1));
                     
                     %% 2iv.8. Add the contribution from the Gauss Point and assemble to the global matrices/vectors
                     
                     % For the stiffness matrix
-                    KpIGA = Penalty*Ke*elLengthSizeOnGP;
-                    KIGA(EFT, EFT) = KIGA(EFT, EFT) + KpIGA;
-
-               
+                    KpIGA = Penalty*(RMatrix'*RMatrix)*elLengthSizeOnGP;
+                    KIGA(EFT, EFT) = KIGA(EFT, EFT) + KpIGA;    
             end
 %             %% 2v. Check for the minimum element area size in the mesh
 %             if elLengthSize < minElSize
