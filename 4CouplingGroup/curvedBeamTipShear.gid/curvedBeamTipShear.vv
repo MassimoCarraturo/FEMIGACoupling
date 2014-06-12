@@ -1,25 +1,25 @@
-BeginZE C:\Users\Notandi\Documents\MATLAB\COME\advanced fem\NEW\test.git\bare\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
-   x -3.0754399299621582 6.6109738349914551
+BeginZE C:\Users\Dusty!\Documents\MATLAB\AFEM_NEW\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
+   x -0.59833407402038574 4.1338682174682617
    y 6.0708675384521484 1.7575600147247314
    z -6.4699611663818359 6.4699611663818359
    e 2.1566536426544189
-   v -0.021959386765956879 -0.18974274396896362 -0.17416466772556305
-   r 0.96601355075836182
-   m 0.8673287034034729 0.34482410550117493 -0.35893902182579041 0 -0.32815757393836975 0.93836891651153564 0.10851909220218658 0 0.37423723936080933 0.023666832596063614 0.92703092098236084 0 0 0 0 1
+   v 0 0 0
+   r 1
+   m 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
    c 1.7677669525146484 3.9142136573791504 0
    pd 0
    pno 0
    pfo 0
    pf 4
    pv 0
-   NowUse 1
+   NowUse 0
    DrawingType 0
    LightVector 90 90 150 0
    OGLShadow(UseShadows) 0
    OGLShadow(RenderMode) RenderNice
    OGLShadow(ShadowBias) -0.002
    OGLShadow(AmbientShadows) 1
-   OGLShadow(UseFBO) 1
+   OGLShadow(UseFBO) 0
    OGLShadow(FBOSize) 2048
    OGLShadow(DimmedLightFactor) 0.02
    OGLStereo(UseStereo) 0
@@ -29,13 +29,13 @@ BeginZE C:\Users\Notandi\Documents\MATLAB\COME\advanced fem\NEW\test.git\bare\4C
    OGLStereo(EyeDistance) 0.075
    OGLStereo(LeftEyeDistance) 1 0 0 1
    OGLStereo(RightEyeDistance) 0 1 1 1
-EndZE C:\Users\Notandi\Documents\MATLAB\COME\advanced fem\NEW\test.git\bare\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
+EndZE C:\Users\Dusty!\Documents\MATLAB\AFEM_NEW\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
 
 BeginMirror
    Mirror 0 Angle 0.0 AngleFake -15.0 SizeFactor 2.0 HeightOffset 0.25 Color #d9e5f24d Backlight Off EdgeStyle No Type Scene DrawMode Mirror
 EndMirror
 
 BeginInfo
-eJzNU8tu2zAQvOsr9hgDiiE/khpCUcCuFUOoH4HtOOnJoKW1Q4QiBZKK5Qb59y4pGz206KFogV6k1T5mOTPUOhOD9k2704H1CwVXzUcrCNbqIKDT/hADMy+Yw15pYHBAiZpnoFHmqFGHwdBX73mNgloKZiFHk2leWq4kXEGv14oDAJicJ3lRCixQWuYawmbyrpns9ULXOlbVTuCo2u9Rx3BC47MrSwtVk/WJ5WQ0DOGzKkpluN+GktFgDlcbbixrhTDW7AhWwSOXuTqGsChRTqZgqrJU2obgYB4Mlwfo9glJEMcdtyaGATHMQ3odNKJ0wU5UCEzmEAET5TMLf8xGMMyyqqiEp3RGiBqE6IIQ/Q6h14UxlvbZz/qegeMrMy5GlHGNtKSqueBMn2DnRWjSEVTOCsFOJHZUX+/rlgdQr5dkHV3X+xaUgkk0wURZAv7HhkGmytPfN4lk+mOTbvu/cqlz22DQ+wxC0f9hVOB1EN6LTTIfL5YxvM14ppVRe0tCaJLHc3n3QlNLskxc02ScXtx7b6aXq3QxJ7btTjvyhqWr++nwK6Tzu8VyNlz76pvnRHLAIGzUcIEXg95eCYhCui2Of68bgmmIu6rxPydI1fYbPz5+gqSRmkS700paaK6Hq07TWbpe0UL3MWM1rLG2lUZY8W9Ip4y6/Uslaa6egVTmPENyrBv1Bz9VN6jtuXxz66rDV8aFu2fwynM6WIGFIj+MXxDBbHSyaM4wvKgKOCr94s4qq2KHGtQe8Aweww159yXwxJKndTJ3YvrjT6ZbSmx3B80ucckE0g+Wb23DyeUf0/nWHFm5febSEs5k+hR7W1fJkryJgwU9yQ462SUkZ2CWzB9c6jvr/sDr
+eJzNU01v2kAQvftXzDFIDjIEUmRVlaA4yCofERCSntBiD2SV9a61uw6mUf57Z9egHlr1ULVSL/Z4Pt7se2+9zsSg3W93OrB+oeCq+WgFwVodBHTaH2Jg5gVz2CsNDA4oUfMMNMocNeowGPrqPa9RUEvBLORoMs1Ly5WEK+j2W3EAAJPzJC9KgQVKy1xD2EzeNZPdfuhax6raCRxV+z3qGE5ofHZlaaFqsj6xnIyGIXxWRakM99tQMhrM4WrDjWWtEMaaHcEqeOQyV8cQFiXKyRRMVZZK2xAczIPh8gDdHiEJ4rjj1sQwIIZ5SK+DRpQu2IkKgckcImCifGbhj9kIhllWFZXwlM4IUYMQXRCi3yHcdGGMpX32s75n4PjKjIsRZVwjLalqLjjTJ9h5EZp0BJWzQrATiR3V1/u65QHU6yVZR9f1vgWlYBJNMFGWgP+xYZCp8vT3TSKZ/tik296vXOrcNhj0PoNQ9H8YFXgdhPdik8zHi2UMbzOeaWXU3pIQmuTxXN690NSSLBPXNBmnF/fem+nlKl3MiW270468Yenqfjr8Cun8brGcDde++uY5kRwwCBs1XODFoLdXAqKQbovjf9MNwTTEXdX4nxOkavuNHx8/QdJITaLdaSUtNNfDVafpLF2vaKH7mLEa1ljbSiOs+DekU0bd3qWSNFfPQCpzniE51o16g5+qG9T2XO7fuurwlXHh7hm88pwOVmChyA/jF0QwG50smjMML6oCjkq/uLPKqtihBrUHPIPH0CfvvgSeWPK0TuZOTH/8yXRLie3uoNklLplA+sHyrW04ufxjOt+aIyu3z1xawplMn2Jv6ypZkjdxsKAn2UEnu4TkDMyS+YNLfQf9RMDv
 
 EndInfo
