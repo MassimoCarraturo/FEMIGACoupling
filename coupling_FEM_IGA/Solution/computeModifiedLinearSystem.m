@@ -205,15 +205,19 @@ P = [xp;yp;zp];
 end
 
  Eta_Coupled = sort([Eta' ; projected(:,2)]);
+ Eta_Coupled = Eta_Coupled';
  %Xi_Coupled = sort([Xi' ; projected(:,1)]);
- meta = length(Eta_Coupled);
+ meta = length(Eta);
  
 
 %% 2. loop over all elements (knot spans)
-for j = 1:meta
+for j = q+1:meta-q-1
+  %  loop over sub knot spans of the element
+  l = j;
+  while Eta_Coupled(l) < Eta(j)
     
         % check if we are in a non-zero knot span
-        if  Eta(j+1)~=Eta(j)
+        if  Eta_Coupled(l+1)~=Eta_Coupled(l)
             %% 2i. Compute the determinant of the Jacobian to the transformation from the NURBS space (eta) to the integration domain [-1,1] 
             %
             %         
@@ -222,7 +226,7 @@ for j = 1:meta
             %                 2 
             %
             
-            detJxiu = (Eta(j+1)-Eta(j))/2;
+            detJxiu = (Eta_Coupled(l+1)-Eta_Coupled(l))/2;
             
             %% 2ii. Create an Element Freedom Table
             
@@ -319,13 +323,15 @@ for j = 1:meta
                     
                     % For the stiffness matrix
                     KpIGA = Penalty*(RMatrix'*RMatrix)*elLengthSizeOnGP;
-                    KIGA(EFT, EFT) = KIGA(EFT, EFT) + KpIGA;    
+                    KIGA(EFT, EFT) = KIGA(EFT, EFT) + KpIGA;   
             end
 %             %% 2v. Check for the minimum element area size in the mesh
 %             if elLengthSize < minElSize
 %                 minElSize = elLengthSize;
 %             end
         end
+    l = l+1;
+  end
 end
 
 % FEM
