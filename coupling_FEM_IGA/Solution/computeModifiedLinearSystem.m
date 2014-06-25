@@ -335,20 +335,22 @@ for j = q+1:meta-q-1
 end
 
 % FEM
-for counterEl = 1:length(strMsh.elements(:,1))
+for counterEl = 1:length(IBC.elements)
     %% 2i. Get the element in the mesh
-    element = strMsh.elements(counterEl,:);
+    element = IBC.elements(counterEl);
     
     %% 2ii. Get the nodes in the element
-    node1 = strMsh.nodes(element(1,1),:);
-    node2 = strMsh.nodes(element(1,2),:);
-    node3 = strMsh.nodes(element(1,3),:);
+    node1 = strMsh.nodes(strMsh.elements(element,1),:);
+    node2 = strMsh.nodes(strMsh.elements(element,2),:);
+    node3 = strMsh.nodes(strMsh.elements(element,3),:);
     
     %% 2iii. Create an Element Freedome Table (EFT)
     EFT = zeros(nDOFsElFEM,1);
     for counterEFT = 1:nNodesElFEM
-        EFT(2*counterEFT-1) = 2*element(1,counterEFT)-1;
-        EFT(2*counterEFT) = 2*element(1,counterEFT);
+        EFT(2*counterEFT-1) = 2*strMsh.elements(element,counterEFT)-1;
+        EFT(2*counterEFT) = 2*strMsh.elements(element,counterEFT);
+        %EFT(2*counterEFT-1) = 2*element(1,counterEFT)-1;
+        %EFT(2*counterEFT) = 2*element(1,counterEFT);
     end
     
     %% 2iv. Loop over all the quadrature points
