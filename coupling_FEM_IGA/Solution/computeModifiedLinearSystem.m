@@ -298,7 +298,6 @@ for j = q+1:meta-q-1
                             x = x + CP(xiSpan-p+b,j-q+c,1)*dR(k,1);
                             y = y + CP(xiSpan-p+b,j-q+c,2)*dR(k,1);
                             z = z + CP(xiSpan-p+b,j-q+c,3)*dR(k,1);
-                            a=[x y z];
                         end
                     end
               
