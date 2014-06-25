@@ -298,6 +298,7 @@ for j = q+1:meta-q-1
                             x = x + CP(xiSpan-p+b,j-q+c,1)*dR(k,1);
                             y = y + CP(xiSpan-p+b,j-q+c,2)*dR(k,1);
                             z = z + CP(xiSpan-p+b,j-q+c,3)*dR(k,1);
+                            a=[x y z];
                         end
                     end
               
@@ -369,7 +370,9 @@ for counterEl = 1:length(strMsh.elements(:,1))
              dN(1,3) dN(1,2) dN(2,3) dN(2,2) dN(3,3) dN(3,2)];
          
         %% 2iv.5. Compute the element stiffness matrix at the Gauss Point and assemble to master stiffness matrix via the EFT
-        KFEM(EFT,EFT) = KFEM(EFT,EFT) + (B'*CFEM*B)*detJxxi*GW(counterGP);
+        KpFEM = Penalty*(N'*N)*elLengthSizeOnGP;
+        KFEM(EFT, EFT) = KFEM(EFT, EFT) + KpFEM;   
+        
         
 %         %% 2iv.6. Compute the element load vector due to body forces and assemble to master load vector via the EFT
 %         bF = bodyForces(xGP(1,1),xGP(1,2),xGP(1,3));

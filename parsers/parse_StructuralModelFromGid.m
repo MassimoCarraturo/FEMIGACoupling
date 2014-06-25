@@ -22,7 +22,7 @@ function [strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,analysis,parameters,nLin
     parse_StructuralModelFromGid(pathToCase,caseName,outMsg)
 %% Function documentation
 %
-% Parses data from an input file created using GiD for a structural 
+% Parses data from an input file created using GiD for a structural
 % boundary value problem.
 %
 %           Input :
@@ -39,18 +39,18 @@ function [strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,analysis,parameters,nLin
 %                   Dirichlet boundary conditions are applied
 %  valuesInhomDBC : The prescribed values for the inhomogeneous Dirichlet
 %                   boundary conditions
-%             NBC :     .nodes : The nodes where Neumann boundary 
+%             NBC :     .nodes : The nodes where Neumann boundary
 %                                conditions are applied
 %                    .loadType : The type of the load for each Neumann node
 %                   .fctHandle : The function handle for each Neumann node
-%                                for the computation of the load vector 
+%                                for the computation of the load vector
 %                                (these functions are unde the folder load)
-%             IBC :     .nodes : The nodes on the interface boundary 
+%             IBC :     .nodes : The nodes on the interface boundary
 %        analysis : .type : The analysis type
 %      parameters : Problem specific technical parameters
 % nLinearAnalysis :     .scheme : The employed nonlinear scheme
 %                    .tolerance : The residual tolerance
-%                      .maxIter : The maximum number of the nonlinear 
+%                      .maxIter : The maximum number of the nonlinear
 %                                 iterations
 %     strDynamics : .timeDependence : Steady-state or transient analysis
 %                           .scheme : The time integration scheme
@@ -93,7 +93,7 @@ if strcmp(outMsg,'outputEnabled')
     fprintf('Parsing data from GiD input file for a structural boundary value\n');
     fprintf('problem has been initiated\n');
     fprintf('________________________________________________________________\n\n');
-
+    
     % start measuring computational time
     tic;
 end
@@ -106,7 +106,7 @@ inhomDBC = [];
 valuesInhomDBC = [];
 
 %% 1. Load the input file from GiD
-fstring = fileread([pathToCase caseName '.dat']); 
+fstring = fileread([pathToCase caseName '.dat']);
 
 %% 2. Load the analysis type
 block = regexp(fstring,'STRUCTURE_ANALYSIS','split');
@@ -149,7 +149,7 @@ if ~strcmp(strDynamics.timeDependence,'STEADY-STATE')
 end
 
 %% 6. Load the structural nodes
-block = regexp(fstring,'STRUCTURE_NODES','split'); 
+block = regexp(fstring,'STRUCTURE_NODES','split');
 block(1) = [];
 out = cell(size(block));
 for k = 1:numel(block)
@@ -161,7 +161,7 @@ strMsh.nodes = out(:,2:4);
 fprintf('>> Number of nodes in the mesh: %d \n',length(strMsh.nodes(:,1)));
 
 %% 7. Load the structural elements by connectivity arrays
-block = regexp(fstring,'STRUCTURE_ELEMENTS','split'); 
+block = regexp(fstring,'STRUCTURE_ELEMENTS','split');
 block(1) = [];
 out = cell(size(block));
 for k = 1:numel(block)
@@ -173,7 +173,7 @@ strMsh.elements = out(:,2:4);
 fprintf('>> Number of elements in the mesh: %d \n',length(strMsh.elements));
 
 %% 8. Load the nodes on which homogeneous Dirichlet boundary conditions are applied
-block = regexp(fstring,'STRUCTURE_DIRICHLET_NODES','split'); 
+block = regexp(fstring,'STRUCTURE_DIRICHLET_NODES','split');
 block(1) = [];
 out = cell(size(block));
 for k = 1:numel(block)
@@ -221,7 +221,7 @@ homDBC = sort(homDBC);
 valuesInhomDBC = valuesInhomDBC(indexSorting);
 
 %% 9. Load the nodes on the Neumann boundary together with the load application information
-block = regexp(fstring,'STRUCTURE_FORCE_NODES','split'); 
+block = regexp(fstring,'STRUCTURE_FORCE_NODES','split');
 block(1) = [];
 out = cell(size(block));
 for k = 1:numel(block)
@@ -281,7 +281,7 @@ for i=1:length(NBC.nodes)
 end
 
 %% 11. Load the nodes on the IGA/FEM interface
-block = regexp(fstring,'STRUCTURE_INTERFACE_NODES','split'); 
+block = regexp(fstring,'STRUCTURE_INTERFACE_NODES','split');
 block(1) = [];
 out = cell(size(block));
 for k = 1:numel(block)
@@ -340,11 +340,28 @@ for i=1:length(IBC.nodes)
     end
 end
 
+% finding elements on the interface
+k=0;
+IBC.elements=[];
+for i=1:length(IBC.nodes)
+    [elementnumber1,nodenumber1]=find(strMsh.elements==IBC.nodes(i));
+    for j=i+1:length(IBC.nodes)    % maybe going to the next node wont work for
+        % all geometries
+        [elementnumber2,nodenumber2]=find(strMsh.elements==IBC.nodes(j));
+        elemonboundary=intersect(elementnumber1,elementnumber2);
+        if elemonboundary>0
+            k=k+1;
+            IBC.elements(k)=elemonboundary;
+        end
+    end
+end
+
+
 %% 13. Appendix
 if strcmp(outMsg,'outputEnabled')
     % Save computational time
     computationalTime = toc;
-
+    
     fprintf('\nParsing took %.2d seconds \n\n',computationalTime);
     fprintf('_________________________Parsing Ended__________________________\n');
     fprintf('################################################################\n\n\n');
