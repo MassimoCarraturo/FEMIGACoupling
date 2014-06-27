@@ -191,19 +191,23 @@ end
 %% 1.1 Do the projection to find Inserted Knots
 P=zeros(1,3); 
 projected=zeros(length(IBC.nodes),2); 
+
 for i=1:length(IBC.nodes)
-xp=strMsh.nodes(IBC.nodes(i),1);
- yp=strMsh.nodes(IBC.nodes(i),2);
- zp=strMsh.nodes(IBC.nodes(i),3);
-P = [xp;yp;zp];
-                    xi0 = XiB;
-                    eta0 = 0;
-                    [xiP,etaP,Projected,flag,noIterations] = ...
+    xp=strMsh.nodes(IBC.nodes(i),1);
+    yp=strMsh.nodes(IBC.nodes(i),2);
+    zp=strMsh.nodes(IBC.nodes(i),3);
+    P = [xp;yp;zp];
+    xi0 = XiB;
+    eta0 = 0;
+    [xiP,etaP,Projected,flag,noIterations] = ...
                         computeNearestPointProjectionOnBSplineSurface(P,p,Xi,q,Eta,CP,isNURBS,xi0,eta0,newtonRaphson);
-                    projected(i,1)=xiP;
-                    projected(i,2)=etaP;
+    projected(i,1)=xiP;
+    projected(i,2)=etaP;
 end
 
+ Projected_knots_from_FEM(:,1) = projected(:,2);
+ Projected_knots_from_FEM(:,2) =IBC.nodes;
+ 
  Eta_Coupled = sort([Eta' ; projected(:,2)]);
  Eta_Coupled = Eta_Coupled';
  %Xi_Coupled = sort([Xi' ; projected(:,1)]);
@@ -213,11 +217,8 @@ end
 %% 2. loop over all elements (knot spans)
 for j = q+1:meta-q-1
   %  loop over sub knot spans of the element
-  l = j;
-  while Eta_Coupled(l) < Eta(j)
-    
         % check if we are in a non-zero knot span
-        if  Eta_Coupled(l+1)~=Eta_Coupled(l)
+        if  Eta_Coupled(j+1)~=Eta_Coupled(j)
             %% 2i. Compute the determinant of the Jacobian to the transformation from the NURBS space (eta) to the integration domain [-1,1] 
             %
             %         
@@ -226,7 +227,7 @@ for j = q+1:meta-q-1
             %                 2 
             %
             
-            detJxiu = (Eta_Coupled(l+1)-Eta_Coupled(l))/2;
+            detJxiu = (Eta_Coupled(j+1)-Eta_Coupled(j))/2;
             
             %% 2ii. Create an Element Freedom Table
             
@@ -236,8 +237,10 @@ for j = q+1:meta-q-1
             % Initialize counter
             k = 1;
          
+            etaKnotSpan = findKnotSpan(Eta_Coupled(j),Eta,neta);
+            
             % Compute the EFT
-            for cpj = j-q:j
+            for cpj = etaKnotSpan-q:etaKnotSpan
                     EFT(k)   = DOFNumbering(1,cpj,1);    % DOFNum....(1,cpj,1) first is 1 because 
                     EFT(k+1) = DOFNumbering(1,cpj,2);    % we fix xi at xi=0 and run over eta
                     
@@ -305,10 +308,69 @@ for j = q+1:meta-q-1
                     % Compute the determinant of the Jacobian
                     detJxxi = norm(Jxxi);
                     
+                   %% Now we have the GP physical Coordinate- Back transform onto FEM
+                   % first find which knot span we are in (corresponding to
+                   % the FEM side)
+                   
+                   for i=1:(size(Projected_knots_from_FEM,1)-1)
+                   if eta<Projected_knots_from_FEM(i,1) && eta>Projected_knots_from_FEM(i+1,1) 
+                       knot_begin(1,1) = i;
+                       knot_begin(1,2) = Projected_knots_from_FEM(i,1);
+                       knot_end(1,1) = i+1;
+                       knot_end(1,2) = Projected_knots_from_FEM(i+1,1);
+                   end
+                   end
+                   
+                   %then find which element we are in
+                   
+                   start_node = Projected_knots_from_FEM(knot_begin(1,1),2);
+                   end_node = Projected_knots_from_FEM(knot_end(1,1),2);
+                   
+                   if find(start_node==IBC.lines(:,1)) == find(end_node==IBC.lines(:,2))
+                       
+                   elementFEM = IBC.lines(find(start_node==IBC.lines(:,1)),3);
+                   
+                   end
+                   
+                   %then back project the GP from our IGA knot span onto
+                   %our FEM element
+                   
+                   general_point(1,1) = x;
+                   general_point(2,1) = y;
+                   general_point(3,1) = z;
+                   
+                   ray_point(1,1) = strMsh.nodes(start_node,1);
+                   ray_point(2,1) = strMsh.nodes(start_node,2);
+                   ray_point(3,1) = strMsh.nodes(start_node,3);
+                   
+                   ray_direction(1,1) = strMsh.nodes(end_node,1);
+                   ray_direction(2,1) = strMsh.nodes(end_node,2);
+                   ray_direction(3,1) = strMsh.nodes(end_node,3);
+                   
+                   ray = ray_direction - ray_point;
+                   
+                   backXfer = ( dot(general_point,ray)/dot(ray, ray) )* ray;
+                   
+                   
+                   
+                   %% Evaluate FEM basis funciton
+                   node1 = strMsh.nodes(strMsh.elements(elementFEM,1),:);
+                   node2 = strMsh.nodes(strMsh.elements(elementFEM,2),:);
+                   node3 = strMsh.nodes(strMsh.elements(elementFEM,3),:);
+                   dN = computeCST2DBasisFunctions(node1,node2,node3,backXfer(1,1),backXfer(2,1));
+                   
+                   N = [dN(1,1) 0       dN(1,2) 0       dN(1,3) 0
+                        0       dN(1,1) 0       dN(1,2) 0       dN(1,3)];
+                 
+                    
                     
                     %% 2iv.6. Compute the element length on the Gauss Point
                     elLengthSizeOnGP = abs(detJxxi)*abs(detJxiu)*GW;
                     elLengthSize = elLengthSize + elLengthSizeOnGP;
+                    
+                    %% Compute the element stiffness matrix at the Gauss Point and assemble
+                    KpFEM = Penalty*(N'*N)*elLengthSizeOnGP;
+                    KFEM(EFT, EFT) = KFEM(EFT, EFT) + KpFEM; 
                 
                     %% 2iv.7. 
                     for counter = 1:nCPsLoc
@@ -330,56 +392,50 @@ for j = q+1:meta-q-1
 %                 minElSize = elLengthSize;
 %             end
         end
-    l = l+1;
-  end
 end
 
 % FEM
-for counterEl = 1:length(IBC.elements)
-    %% 2i. Get the element in the mesh
-    element = IBC.elements(counterEl);
-    
-    %% 2ii. Get the nodes in the element
-    node1 = strMsh.nodes(strMsh.elements(element,1),:);
-    node2 = strMsh.nodes(strMsh.elements(element,2),:);
-    node3 = strMsh.nodes(strMsh.elements(element,3),:);
-    
-    %% 2iii. Create an Element Freedome Table (EFT)
-    EFT = zeros(nDOFsElFEM,1);
-    for counterEFT = 1:nNodesElFEM
-        EFT(2*counterEFT-1) = 2*strMsh.elements(element,counterEFT)-1;
-        EFT(2*counterEFT) = 2*strMsh.elements(element,counterEFT);
-        %EFT(2*counterEFT-1) = 2*element(1,counterEFT)-1;
-        %EFT(2*counterEFT) = 2*element(1,counterEFT);
-    end
-    
-    %% 2iv. Loop over all the quadrature points
-    for counterGP = 1:nGP
-        %% 2iv.1. Transform the Gauss Point location from the parameter to the physical space
-        xGP = GP(counterGP,1)*node1(1,:) + GP(counterGP,2)*node2(1,:) + (1-GP(counterGP,1)-GP(counterGP,2))*node3(1,:);
-        
-        %% 2iv.2. Compute the basis functions and their derivatives at the Gauss Point
-        [dN,detJxxi] = computeCST2DBasisFunctionsAndFirstDerivatives(node1,node2,node3,xGP(1,1),xGP(1,2));
-        
-        %% 2iv.3. Form the basis functions matrix at the Gauss Point
-        N = [dN(1,1) 0       dN(2,1) 0       dN(3,1) 0
-             0       dN(1,1) 0       dN(2,1) 0       dN(3,1)];
-        
-        %% 2iv.4. Form the B-Operator matrix for the plate in membrane action problem
-        B = [dN(1,2) 0       dN(2,2) 0       dN(3,2) 0
-             0       dN(1,3) 0       dN(2,3) 0       dN(3,3)
-             dN(1,3) dN(1,2) dN(2,3) dN(2,2) dN(3,3) dN(3,2)];
-         
-        %% 2iv.5. Compute the element stiffness matrix at the Gauss Point and assemble to master stiffness matrix via the EFT
-        KpFEM = Penalty*(N'*N)*elLengthSizeOnGP;
-        KFEM(EFT, EFT) = KFEM(EFT, EFT) + KpFEM;   
-        
-        
-%         %% 2iv.6. Compute the element load vector due to body forces and assemble to master load vector via the EFT
-%         bF = bodyForces(xGP(1,1),xGP(1,2),xGP(1,3));
-%         FFEM(EFT) = FFEM(EFT) + N'*bF(1:2,1)*detJxxi*GW(counterGP);
-    end
-end
+% for counterEl = 1:length(IBC.elements)
+%     %% 2i. Get the element in the mesh
+%     element = IBC.elements(counterEl);
+%     
+%     %% 2ii. Get the nodes in the element
+%     node1 = strMsh.nodes(strMsh.elements(element,1),:);
+%     node2 = strMsh.nodes(strMsh.elements(element,2),:);
+%     node3 = strMsh.nodes(strMsh.elements(element,3),:);
+%     
+%     %% 2iii. Create an Element Freedome Table (EFT)
+%     EFT = zeros(nDOFsElFEM,1);
+%     for counterEFT = 1:nNodesElFEM
+%         EFT(2*counterEFT-1) = 2*strMsh.elements(element,counterEFT)-1;
+%         EFT(2*counterEFT) = 2*strMsh.elements(element,counterEFT);
+%         %EFT(2*counterEFT-1) = 2*element(1,counterEFT)-1;
+%         %EFT(2*counterEFT) = 2*element(1,counterEFT);
+%     end
+%     
+%     %% 2iv. Loop over all the quadrature points
+%     for counterGP = 1:nGP
+%         %% 2iv.1. Transform the Gauss Point location from the parameter to the physical space
+%         xGP = GP(counterGP,1)*node1(1,:) + GP(counterGP,2)*node2(1,:) + (1-GP(counterGP,1)-GP(counterGP,2))*node3(1,:);
+%         
+%         %% 2iv.2. Compute the basis functions and their derivatives at the Gauss Point
+%         [dN,detJxxi] = computeCST2DBasisFunctionsAndFirstDerivatives(node1,node2,node3,xGP(1,1),xGP(1,2));
+%          
+%         
+%         %% 2iv.3. Form the basis functions matrix at the Gauss Point
+%         N = [dN(1,1) 0       dN(2,1) 0       dN(3,1) 0
+%              0       dN(1,1) 0       dN(2,1) 0       dN(3,1)];
+%          
+%         %% 2iv.5. Compute the element stiffness matrix at the Gauss Point and assemble to master stiffness matrix via the EFT
+%         KpFEM = Penalty*(N'*N)*elLengthSizeOnGP;
+%         KFEM(EFT, EFT) = KFEM(EFT, EFT) + KpFEM;   
+%         
+%         
+% %         %% 2iv.6. Compute the element load vector due to body forces and assemble to master load vector via the EFT
+% %         bF = bodyForces(xGP(1,1),xGP(1,2),xGP(1,3));
+% %         FFEM(EFT) = FFEM(EFT) + N'*bF(1:2,1)*detJxxi*GW(counterGP);
+%     end
+% end
 
 
 %% 5. Generate Sparse Stiffness Matrix
