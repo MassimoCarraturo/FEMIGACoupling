@@ -330,6 +330,10 @@ for j = q+1:meta-q-1
                        
                    elementFEM = IBC.lines(find(start_node==IBC.lines(:,1)),3);
                    
+                   elseif find(start_node==IBC.lines(:,2)) == find(end_node==IBC.lines(:,1))
+                       
+                   elementFEM = IBC.lines(find(start_node==IBC.lines(:,2)),3);
+                   
                    end
                    
                    %then back project the GP from our IGA knot span onto
