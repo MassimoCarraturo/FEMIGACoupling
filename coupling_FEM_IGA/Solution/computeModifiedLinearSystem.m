@@ -17,7 +17,7 @@
 %   _______________________________________________________________       %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [K] = computeModifiedLinearSystem...
+function K = computeModifiedLinearSystem...
     (KFEM,KIGA,IBC,dHat,dHatSaved,dHatDot,dHatDotSaved,DOFNumbering,XiB,BSplinePatch,...
     transientAnalysis,t,parameters,int,uFEM,uSavedFEM,uDotFEM,uDotSavedFEM, ...
     DOFNumberingFEM,strMsh,analysisFEM,strDynamics,...
@@ -109,6 +109,9 @@ Eta = BSplinePatch.Eta;
 CP = BSplinePatch.CP;
 isNURBS = BSplinePatch.isNURBS;
 
+% Projection tolerance
+tol = 1e-5;
+
 % Compute the number of knots and Control Points in both parametric
 % directions
 
@@ -116,29 +119,25 @@ neta = length(CP(1,:,1));
 nxi = length(CP(:,1,1));
 
 % Number of global DOFs
-noDOFs = 2*neta;
+noDOFsIGA = 2*neta*nxi;
 
 % Local number of Control Points
-nCPsLoc = (q+1);
+nCPsLoc = (q+1)*(p+1);
 
 % Number of DOFs affected the element under study
-noDOFsLoc = 2*(q+1);
+noDOFsLoc = 2*nCPsLoc;
 
-% Material matrix D (for plane stress problems)
-D = parameters.E/(1-parameters.nue^2)*[1              parameters.nue 0
-                                       parameters.nue 1              0 
-                                       0              0             (1-parameters.nue)/2];
-
-
-KpIGA = zeros(noDOFsLoc,noDOFsLoc);
+KpIGA = zeros(noDOFsIGA,noDOFsIGA);
 
 % FEM inputs
 
 % Number of nodes in the mesh
-nNodes = length(IBC.nodes(:,1));
+noNodes = length(strMsh.nodes(:,1));
 
 % Number of DOFs in the mesh
-nDOFsFEM = 2*nNodes;
+noDOFsFEM = 2*noNodes;
+
+KpFEM = zeros(noDOFsFEM,noDOFsFEM);
 
 % Number of nodes at the element level
 nNodesElFEM = 3;
@@ -164,8 +163,8 @@ elseif strcmp(analysisFEM.physics,'PLANE_STRAIN')
                    0                                 0                                 (1-2*parametersFEM.nue)/2/(1-parametersFEM.nue)];
 end
     
-
-
+%% Initialize coupling matrix
+Cp_FEM_IGA = zeros(noDOFsFEM,noDOFsIGA);
 
 %% 1. Choose an integration rule
 
@@ -186,7 +185,7 @@ if strcmp(int.type,'default')
 elseif strcmp(int.type,'manual')
     nGP = int.nGP;
 end
-[GP,GW] = getGaussRuleOnCanonicalTriangle(nGP);
+% [GP,GW] = getGaussRuleOnCanonicalTriangle(nGP);
 
 %% 1.1 Do the projection to find Inserted Knots
 P=zeros(1,3); 
@@ -201,8 +200,21 @@ for i=1:length(IBC.nodes)
     eta0 = 0;
     [xiP,etaP,Projected,flag,noIterations] = ...
                         computeNearestPointProjectionOnBSplineSurface(P,p,Xi,q,Eta,CP,isNURBS,xi0,eta0,newtonRaphson);
-    projected(i,1)=xiP;
-    projected(i,2)=etaP;
+    if norm(xiP - Xi(1)) < tol
+        projected(i,1) = Xi(1);
+    elseif norm(xiP - Xi(length(Xi))) < tol
+        projected(i,1) = Xi(length(Xi));
+    else
+        projected(i,1) = xiP;
+    end
+    
+    if norm(etaP - Eta(1)) < tol
+        projected(i,2) = Eta(1);
+    elseif norm(etaP - Eta(length(Eta))) < tol
+        projected(i,2) = Eta(length(Eta));
+    else
+        projected(i,2) = etaP;
+    end
 end
 
  Projected_knots_from_FEM(:,1) = projected(:,2);
@@ -215,7 +227,7 @@ end
  
 
 %% 2. loop over all elements (knot spans)
-for j = q+1:meta-q-1
+for j = 1:length(Eta_Coupled)-1
   %  loop over sub knot spans of the element
         % check if we are in a non-zero knot span
         if  Eta_Coupled(j+1)~=Eta_Coupled(j)
@@ -232,33 +244,34 @@ for j = q+1:meta-q-1
             %% 2ii. Create an Element Freedom Table
             
             % Initialize element freedom table
-            EFT = zeros(1,noDOFsLoc);
+            EFT_IGA = zeros(1,noDOFsLoc);
             
             % Initialize counter
             k = 1;
          
             etaKnotSpan = findKnotSpan(Eta_Coupled(j),Eta,neta);
-            
+            xiKnotSpan = findKnotSpan(Xi(1),Xi,nxi);
+                        
             % Compute the EFT
             for cpj = etaKnotSpan-q:etaKnotSpan
-                    EFT(k)   = DOFNumbering(1,cpj,1);    % DOFNum....(1,cpj,1) first is 1 because 
-                    EFT(k+1) = DOFNumbering(1,cpj,2);    % we fix xi at xi=0 and run over eta
+                for cpi = xiKnotSpan-p:xiKnotSpan
+                    EFT_IGA(k)   = DOFNumbering(cpi,cpj,1);    % DOFNum....(1,cpj,1) first is 1 because 
+                    EFT_IGA(k+1) = DOFNumbering(cpi,cpj,2);    % we fix xi at xi=0 and run over eta
                     
                     % update counter
                     k = k + 2;
+                end
             end
             
             %% 2iii. Initialize element area size and knot span size
             elLengthSize = 0;
-            
-            xiSpan = findKnotSpan(Xi(1),Xi,nxi);
             
             %% 2iv. Loop over all Gauss Points
             for keta = 1:length(etaGP)
                
                     %% 2iv.1. Compute the coordinates of the quadrature points at the NURBS domain via mapping
                     xi = XiB;
-                    eta = (Eta(j+1)+Eta(j) + etaGP(keta)*(Eta(j+1)-Eta(j)))/2;
+                    eta = (Eta_Coupled(j+1)+Eta_Coupled(j))/2 + etaGP(keta)*(Eta_Coupled(j+1)-Eta_Coupled(j))/2;
                 
                     %% 2iv.2. Compute the quadrature weight as a tensor product (check if this is right! We avoid the tensor product...)
                     GW = etaGW(keta);
@@ -268,7 +281,7 @@ for j = q+1:meta-q-1
                 
                     %% 2iv.4. Compute the IGA basis functions and their first derivatives at the quadrature point
                     nDrv = 1;
-                    dR = computeIGABasisFunctionsAndDerivativesForSurface(xiSpan,p,xi,Xi,etaSpan,q,eta,Eta,CP,isNURBS,nDrv);
+                    dR = computeIGABasisFunctionsAndDerivativesForSurface(xiKnotSpan,p,xi,Xi,etaSpan,q,eta,Eta,CP,isNURBS,nDrv);
                     
                     %% 2iv.5. Compute the determinant of the Jacobian to the transformation from the physical space (x-y) to the NURBS parameter space (xi-eta) and the physical coordinates of the Gauss point
                 
@@ -293,14 +306,14 @@ for j = q+1:meta-q-1
                             % Compute recursively the entries of the Jacobian
 %                             Jxxi(1,1) = Jxxi(1,1) + CP(p,j-q+c,1)*dR(k,2);
 %                             Jxxi(1,2) = Jxxi(1,2) + CP(p,j-q+c,2)*dR(k,2);
-                            Jxxi(1,1) = Jxxi(1,1) + CP(xiSpan-p+b,j-q+c,1)*dR(k,3);
-                            Jxxi(1,2) = Jxxi(1,2) + CP(xiSpan-p+b,j-q+c,2)*dR(k,3);
+                            Jxxi(1,1) = Jxxi(1,1) + CP(xiKnotSpan-p+b,etaSpan-q+c,1)*dR(k,3);
+                            Jxxi(1,2) = Jxxi(1,2) + CP(xiKnotSpan-p+b,etaSpan-q+c,2)*dR(k,3);
                             
                             % Compute the Cartesian coordinates of the
                             % Gauss Point
-                            x = x + CP(xiSpan-p+b,j-q+c,1)*dR(k,1);
-                            y = y + CP(xiSpan-p+b,j-q+c,2)*dR(k,1);
-                            z = z + CP(xiSpan-p+b,j-q+c,3)*dR(k,1);
+                            x = x + CP(xiKnotSpan-p+b,etaSpan-q+c,1)*dR(k,1);
+                            y = y + CP(xiKnotSpan-p+b,etaSpan-q+c,2)*dR(k,1);
+                            z = z + CP(xiKnotSpan-p+b,etaSpan-q+c,3)*dR(k,1);
                         end
                     end
               
@@ -313,12 +326,12 @@ for j = q+1:meta-q-1
                    % the FEM side)
                    
                    for i=1:(size(Projected_knots_from_FEM,1)-1)
-                   if eta<Projected_knots_from_FEM(i,1) && eta>Projected_knots_from_FEM(i+1,1) 
-                       knot_begin(1,1) = i;
-                       knot_begin(1,2) = Projected_knots_from_FEM(i,1);
-                       knot_end(1,1) = i+1;
-                       knot_end(1,2) = Projected_knots_from_FEM(i+1,1);
-                   end
+                       if eta<Projected_knots_from_FEM(i,1) && eta>Projected_knots_from_FEM(i+1,1) 
+                           knot_begin(1,1) = i;
+                           knot_begin(1,2) = Projected_knots_from_FEM(i,1);
+                           knot_end(1,1) = i+1;
+                           knot_end(1,2) = Projected_knots_from_FEM(i+1,1);
+                       end
                    end
                    
                    %then find which element we are in
@@ -327,13 +340,9 @@ for j = q+1:meta-q-1
                    end_node = Projected_knots_from_FEM(knot_end(1,1),2);
                    
                    if find(start_node==IBC.lines(:,1)) == find(end_node==IBC.lines(:,2))
-                       
-                   elementFEM = IBC.lines(find(start_node==IBC.lines(:,1)),3);
-                   
+                        elementFEM = IBC.lines(find(start_node==IBC.lines(:,1)),3);
                    elseif find(start_node==IBC.lines(:,2)) == find(end_node==IBC.lines(:,1))
-                       
-                   elementFEM = IBC.lines(find(start_node==IBC.lines(:,2)),3);
-                   
+                        elementFEM = IBC.lines(find(start_node==IBC.lines(:,2)),3);
                    end
                    
                    %then back project the GP from our IGA knot span onto
@@ -361,26 +370,31 @@ for j = q+1:meta-q-1
                    node1 = strMsh.nodes(strMsh.elements(elementFEM,1),:);
                    node2 = strMsh.nodes(strMsh.elements(elementFEM,2),:);
                    node3 = strMsh.nodes(strMsh.elements(elementFEM,3),:);
+                   
+                   EFT_FEM = zeros(6,1);
+                   for counterFEM = 1:3
+                        EFT_FEM(2*counterFEM-1) = 2*strMsh.elements(elementFEM,counterFEM)-1;
+                        EFT_FEM(2*counterFEM) = 2*strMsh.elements(elementFEM,counterFEM);
+                   end
+                   
                    dN = computeCST2DBasisFunctions(node1,node2,node3,backXfer(1,1),backXfer(2,1));
                    
                    N = [dN(1,1) 0       dN(1,2) 0       dN(1,3) 0
                         0       dN(1,1) 0       dN(1,2) 0       dN(1,3)];
                  
-                    
+                    %% 2iv.7. 
+                    for counter = 1:nCPsLoc
+                        RMatrix(1,2*counter-1) = dR(counter,1);
+                        RMatrix(2,2*counter) = dR(counter,1);
+                    end
                     
                     %% 2iv.6. Compute the element length on the Gauss Point
                     elLengthSizeOnGP = abs(detJxxi)*abs(detJxiu)*GW;
                     elLengthSize = elLengthSize + elLengthSizeOnGP;
                     
                     %% Compute the element stiffness matrix at the Gauss Point and assemble
-                    KpFEM = Penalty*(N'*N)*elLengthSizeOnGP;
-                    KFEM(EFT, EFT) = KFEM(EFT, EFT) + KpFEM; 
-                
-                    %% 2iv.7. 
-                    for counter = 1:nCPsLoc
-                        RMatrix(1,2*counter-1) = dR(counter,1);
-                        RMatrix(2,2*counter) = dR(counter,1);
-                    end
+                    KpFEMEl = Penalty*(N'*N)*elLengthSizeOnGP;
+                    KpFEM(EFT_FEM, EFT_FEM) = KpFEM(EFT_FEM, EFT_FEM) + KpFEMEl; 
                     
 %                     b = bodyForces(x,y,z,t);
 %                     [Ke,Fe] = computeElStiffMtxAndLoadVctPlateInMembraneActionLinear(nCPsLoc,dR(:,1),dR(:,2:3),Jxxi,D,b(1:2,1));
@@ -388,8 +402,12 @@ for j = q+1:meta-q-1
                     %% 2iv.8. Add the contribution from the Gauss Point and assemble to the global matrices/vectors
                     
                     % For the stiffness matrix
-                    KpIGA = Penalty*(RMatrix'*RMatrix)*elLengthSizeOnGP;
-                    KIGA(EFT, EFT) = KIGA(EFT, EFT) + KpIGA;   
+                    KpIGAEl = Penalty*(RMatrix'*RMatrix)*elLengthSizeOnGP;
+                    KpIGA(EFT_IGA, EFT_IGA) = KpIGA(EFT_IGA, EFT_IGA) + KpIGAEl;
+                    
+                    %% Compute the coupling matrix
+                    Cp_FEM_IGA_El = - Penalty * (N'*RMatrix) * elLengthSizeOnGP;
+                    Cp_FEM_IGA(EFT_FEM, EFT_IGA) = Cp_FEM_IGA(EFT_FEM, EFT_IGA) + Cp_FEM_IGA_El;
             end
 %             %% 2v. Check for the minimum element area size in the mesh
 %             if elLengthSize < minElSize
@@ -398,51 +416,8 @@ for j = q+1:meta-q-1
         end
 end
 
-% FEM
-% for counterEl = 1:length(IBC.elements)
-%     %% 2i. Get the element in the mesh
-%     element = IBC.elements(counterEl);
-%     
-%     %% 2ii. Get the nodes in the element
-%     node1 = strMsh.nodes(strMsh.elements(element,1),:);
-%     node2 = strMsh.nodes(strMsh.elements(element,2),:);
-%     node3 = strMsh.nodes(strMsh.elements(element,3),:);
-%     
-%     %% 2iii. Create an Element Freedome Table (EFT)
-%     EFT = zeros(nDOFsElFEM,1);
-%     for counterEFT = 1:nNodesElFEM
-%         EFT(2*counterEFT-1) = 2*strMsh.elements(element,counterEFT)-1;
-%         EFT(2*counterEFT) = 2*strMsh.elements(element,counterEFT);
-%         %EFT(2*counterEFT-1) = 2*element(1,counterEFT)-1;
-%         %EFT(2*counterEFT) = 2*element(1,counterEFT);
-%     end
-%     
-%     %% 2iv. Loop over all the quadrature points
-%     for counterGP = 1:nGP
-%         %% 2iv.1. Transform the Gauss Point location from the parameter to the physical space
-%         xGP = GP(counterGP,1)*node1(1,:) + GP(counterGP,2)*node2(1,:) + (1-GP(counterGP,1)-GP(counterGP,2))*node3(1,:);
-%         
-%         %% 2iv.2. Compute the basis functions and their derivatives at the Gauss Point
-%         [dN,detJxxi] = computeCST2DBasisFunctionsAndFirstDerivatives(node1,node2,node3,xGP(1,1),xGP(1,2));
-%          
-%         
-%         %% 2iv.3. Form the basis functions matrix at the Gauss Point
-%         N = [dN(1,1) 0       dN(2,1) 0       dN(3,1) 0
-%              0       dN(1,1) 0       dN(2,1) 0       dN(3,1)];
-%          
-%         %% 2iv.5. Compute the element stiffness matrix at the Gauss Point and assemble to master stiffness matrix via the EFT
-%         KpFEM = Penalty*(N'*N)*elLengthSizeOnGP;
-%         KFEM(EFT, EFT) = KFEM(EFT, EFT) + KpFEM;   
-%         
-%         
-% %         %% 2iv.6. Compute the element load vector due to body forces and assemble to master load vector via the EFT
-% %         bF = bodyForces(xGP(1,1),xGP(1,2),xGP(1,3));
-% %         FFEM(EFT) = FFEM(EFT) + N'*bF(1:2,1)*detJxxi*GW(counterGP);
-%     end
-% end
-
-
 %% 5. Generate Sparse Stiffness Matrix
-K=blkdiag(KFEM,KIGA);
+K = [KFEM + KpFEM Cp_FEM_IGA
+     Cp_FEM_IGA'  KIGA + KpIGA];
 
 end

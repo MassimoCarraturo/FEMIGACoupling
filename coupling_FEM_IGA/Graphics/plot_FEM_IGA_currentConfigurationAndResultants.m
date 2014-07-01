@@ -17,8 +17,8 @@
 %   _______________________________________________________________       %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function index = plot_FEM_IGA_currentConfigurationAndResultants(p,q,Xi,Eta,CP,isNURBS,rb,parameters,Fl,dHat,graph,outMsg,...
-    mesh,rbFEM,displacement,parametersFEM,analysis)
+function index = plot_FEM_IGA_currentConfigurationAndResultants(p,q,Xi,Eta,CP,isNURBS,rb,parameters,Fl,dHatIGA,graph,outMsg,...
+    mesh,rbFEM,dHatFEM,parametersFEM,analysis)
 %% Function documentation
 %
 % Plots the current configuration of a plate in membrane action given the
@@ -163,8 +163,8 @@ counter = 1;
 
 for i=1:length(mesh.nodes)
     % Add the x and y components of the displacement field
-    nodes_displaced(i,1) = mesh.nodes(i,1) + displacement(2*counter-1);
-    nodes_displaced(i,2) = mesh.nodes(i,2) + displacement(2*counter);
+    nodes_displaced(i,1) = mesh.nodes(i,1) + dHatFEM(2*counter-1);
+    nodes_displaced(i,2) = mesh.nodes(i,2) + dHatFEM(2*counter);
     
     % Update counter
     counter = counter + 1;
@@ -184,7 +184,7 @@ figure(graph.index)
 
 % Plot the window
 subplot(2,1,1);
-plot_postprocCurrentConfigurationIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,xiGrid,etaGrid,rb,Fl,dHat,graph);
+plot_postprocCurrentConfigurationIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,xiGrid,etaGrid,rb,Fl,dHatIGA,graph);
 
 % Assign graphic properties and title
 camlight left; lighting phong;
@@ -225,11 +225,7 @@ hold off;
 
 % Graph properties
 view (2);
-axis ([0 6 0 6])
-axis equal;
-axis on;
-xlabel('x','FontSize',14);
-ylabel('y','FontSize',14);
+% axis ([0 6 0 6])
 
 % Title
 if strcmp(analysis.type,'PLANE_STESS')
@@ -245,7 +241,7 @@ end
 
 % Plot the window
 subplot(2,1,2);
-plot_postprocResultantsIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,parameters,xiGrid,etaGrid,dHat,graph);
+plot_postprocResultantsIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,parameters,xiGrid,etaGrid,dHatIGA,graph);
 
 % Assign graphic properties and title
 if strcmp(graph.resultant,'displacement')
@@ -346,7 +342,7 @@ for c_element=1:size(mesh.elements(:,1))
     end
     
     % Get the element displacement vector
-    displacementElement = displacement(EFT);
+    displacementElement = dHatFEM(EFT);
 
     % The moving vertices
     Pi_eta = Pi;
@@ -465,13 +461,12 @@ hold on;
 % graph properties
 view (2);
 % axis auto;
-axis ([0 6 0 6])
+% axis ([0 6 0 6])
+
 axis equal;
 axis on;
 xlabel('x','FontSize',14);
 ylabel('y','FontSize',14);
-
-hold off;
 
 
 %% 3. Update the graph index

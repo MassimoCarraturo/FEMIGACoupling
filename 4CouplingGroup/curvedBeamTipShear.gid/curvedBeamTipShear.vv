@@ -1,6 +1,6 @@
 BeginZE C:\Users\Dusty!\Documents\MATLAB\AFEM_NEW\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
-   x -0.59833407402038574 4.1338682174682617
-   y 6.0708675384521484 1.7575600147247314
+   x -2.1160407066345215 6.7449307441711426
+   y 5.0681066513061523 1.1752610206604004
    z -6.4699611663818359 6.4699611663818359
    e 2.1566536426544189
    v 0 0 0
@@ -12,7 +12,7 @@ BeginZE C:\Users\Dusty!\Documents\MATLAB\AFEM_NEW\4CouplingGroup\curvedBeamTipSh
    pfo 0
    pf 4
    pv 0
-   NowUse 0
+   NowUse 1
    DrawingType 0
    LightVector 90 90 150 0
    OGLShadow(UseShadows) 0

@@ -184,7 +184,7 @@ parameters2.nue = 0.0;
 parameters2.t = 1;
 
 %Penalty Term
-Beta = 10E+4;
+Beta = 1e7;
 
 %% GUI
 
@@ -300,7 +300,7 @@ rb2 = [];
 
 % Load
 Fl2 = [];
-fx = -1e2;
+fx = -1e4;
 xib = 1;   etab = [0 1];   directionForce=1;
 Fl2 = computeLoadVctLineIGAPlateInMembraneAction(Fl2,xib,etab,p2,q2,Xi2,Eta2,CP2,isNURBS2,fx,directionForce,int2,'outputEnabled');
 % xib = [0 0.5];   etab = 1;   directionForce = 1;
@@ -342,9 +342,9 @@ etacoup2 = [0 1];
 
 %% Postprocessing
 graph.visualization.geometry = 'reference_and_current';
-
-graph.index = plot_FEM_IGA_currentConfigurationAndResultants(p2,q2,Xi2,Eta2,CP2,isNURBS2,homDOFs,parameters,Fl2,dHat,graph,'outputEnabled',...
-    strMsh,homDBC,dHat,parameters,analysis);
+noDOFsFEM = length(strMsh.nodes(:,1))*2;
+graph.index = plot_FEM_IGA_currentConfigurationAndResultants(p2,q2,Xi2,Eta2,CP2,isNURBS2,homDOFs,parameters,Fl2,dHat(noDOFsFEM+1:length(dHat)),graph,'outputEnabled',...
+    strMsh,homDBC,dHat(1:noDOFsFEM),parameters,analysis);
 
 
 
