@@ -17,7 +17,7 @@
 %   _______________________________________________________________       %
 %                                                                         %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function index = plot_FEM_IGA_currentConfigurationAndResultants(p,q,Xi,Eta,CP,isNURBS,rb,parameters,Fl,dHatIGA,graph,outMsg,...
+function index = plot_FEM_IGA_currentConfigurationAndResultants(p,q,Xi,Eta,CP,isNURBS,rb,parametersIGA,Fl,dHatIGA,graph,outMsg,...
     mesh,rbFEM,dHatFEM,parametersFEM,analysis)
 %% Function documentation
 %
@@ -247,7 +247,7 @@ ylabel('y','FontSize',14);
 
 % Plot the window
 subplot(2,1,2);
-plot_postprocResultantsIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,parameters,xiGrid,etaGrid,dHatIGA,graph);
+plot_postprocResultantsIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,parametersIGA,xiGrid,etaGrid,dHatIGA,graph);
 
 % Assign graphic properties and title
 if strcmp(graph.resultant,'displacement')
@@ -315,7 +315,7 @@ step_eta = 1/(grid_eta+1);
 % Plot the mesh edges
 hold on;
 plot_EdgesTriangularMesh2D(mesh);
-
+view (2);
 
 for c_element=1:size(mesh.elements(:,1))
     % Compute the basis functions evaluated at the grid points
@@ -330,7 +330,7 @@ for c_element=1:size(mesh.elements(:,1))
     element = mesh.elements(c_element,:);
     
     % get coordinates of the element vertices
-    nodes = mesh.nodes(element,:);
+%     nodes = mesh.nodes(element,:);
     node_i = element(1,1);
     node_j = element(1,2);
     node_k = element(1,3);

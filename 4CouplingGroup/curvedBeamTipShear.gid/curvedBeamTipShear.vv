@@ -1,11 +1,11 @@
-BeginZE C:\Users\Dusty!\Documents\MATLAB\AFEM_NEW\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
-   x -2.1160407066345215 6.7449307441711426
-   y 5.0681066513061523 1.1752610206604004
+BeginZE C:\Users\Koscsoa\Documents\GitHub\FEMIGACoupling\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
+   x -2.0041604042053223 6.6330504417419434
+   y 6.2509932518005371 -0.007625579833984375
    z -6.4699611663818359 6.4699611663818359
    e 2.1566536426544189
-   v 0 0 0
-   r 1
-   m 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0 1
+   v 0.44224299589664195 -0.73289500849252875 -0.18593325777396849
+   r 0.48240528890203899
+   m -0.14341254532337189 -0.46884498000144958 -0.87156021595001221 0 -0.82762575149536133 0.53969991207122803 -0.15414160490036011 0 0.54264950752258301 0.69921982288360596 -0.4654279351234436 0 0 0 0 1
    c 1.7677669525146484 3.9142136573791504 0
    pd 0
    pno 0
@@ -29,7 +29,7 @@ BeginZE C:\Users\Dusty!\Documents\MATLAB\AFEM_NEW\4CouplingGroup\curvedBeamTipSh
    OGLStereo(EyeDistance) 0.075
    OGLStereo(LeftEyeDistance) 1 0 0 1
    OGLStereo(RightEyeDistance) 0 1 1 1
-EndZE C:\Users\Dusty!\Documents\MATLAB\AFEM_NEW\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
+EndZE C:\Users\Koscsoa\Documents\GitHub\FEMIGACoupling\4CouplingGroup\curvedBeamTipShear.gid\curvedBeamTipShear.vv
 
 BeginMirror
    Mirror 0 Angle 0.0 AngleFake -15.0 SizeFactor 2.0 HeightOffset 0.25 Color #d9e5f24d Backlight Off EdgeStyle No Type Scene DrawMode Mirror

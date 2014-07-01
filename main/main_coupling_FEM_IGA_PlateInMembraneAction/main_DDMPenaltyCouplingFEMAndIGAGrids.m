@@ -159,29 +159,29 @@ end
 
 %% Material constants
 
-% 1st patch :
-% ___________
-
-% Young's modulus
-parameters1.E = 1e5;
-
-% Poisson ratio
-parameters1.nue = 0.0;
-
-% Plate thickness
-parameters1.t = 1;
-
-% 2nd patch :
-% ___________
-
-% Young's modulus
-parameters2.E = 1e5;
-
-% Poisson ratio
-parameters2.nue = 0.0;
-
-% Plate thickness
-parameters2.t = 1;
+% % 1st patch :
+% % ___________
+% 
+% % Young's modulus
+% parameters1.E = 1e5;
+% 
+% % Poisson ratio
+% parameters1.nue = 0.333;
+% 
+% % Plate thickness
+% parameters1.t = 1;
+% 
+% % 2nd patch :
+% % ___________
+% 
+% % Young's modulus
+% parameters2.E = 1e5;
+% 
+% % Poisson ratio
+% parameters2.nue = 0.333;
+% 
+% % Plate thickness
+% parameters2.t = 1;
 
 %Penalty Term
 Beta = 1e7;
@@ -300,7 +300,7 @@ rb2 = [];
 
 % Load
 Fl2 = [];
-fx = -1e4;
+fx = -1e3;
 xib = 1;   etab = [0 1];   directionForce=1;
 Fl2 = computeLoadVctLineIGAPlateInMembraneAction(Fl2,xib,etab,p2,q2,Xi2,Eta2,CP2,isNURBS2,fx,directionForce,int2,'outputEnabled');
 % xib = [0 0.5];   etab = 1;   directionForce = 1;
