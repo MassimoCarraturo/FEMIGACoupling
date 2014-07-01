@@ -234,6 +234,12 @@ elseif strcmp(analysis.type,'PLANE_STRAIN')
     title('Deformed configuration corresponding to plain strain analysis');
 end
 
+axis tight;
+axis fill;
+axis on;
+xlabel('x','FontSize',14);
+ylabel('y','FontSize',14);
+
 %% 2. Plot the second window: Resultant visualization
 
 %%%%%%%%%%%%%%%%%%%  IGA
@@ -463,7 +469,8 @@ view (2);
 % axis auto;
 % axis ([0 6 0 6])
 
-axis equal;
+axis tight;
+axis fill;
 axis on;
 xlabel('x','FontSize',14);
 ylabel('y','FontSize',14);
