@@ -200,13 +200,16 @@ title('Reference configuration for an isogeometric plate in membrane action');
 graph.index = graph.index + 1;
 
 %% Solve the system
-[dHat,~] = solve_IGAPlateInMembraneActionLinear(p,Xi,q,Eta,CP,isNURBS,parameters,Fl,bodyForces,homDOFs,...
+[dHat,~,K] = solve_IGAPlateInMembraneActionLinear(p,Xi,q,Eta,CP,isNURBS,parameters,Fl,bodyForces,homDOFs,...
     inhomDOFs,valuesInhomDOFs,int,'outputEnabled');
 
 %% Postprocessing 
+% Energy norm
+Energynorm=dHat'*K*dHat;
+Energynorm=sqrt(0.5*Energynorm);
 
 % Plot the current configuration and the selected resultant
-graph.index = plot_postprocIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,homDOFs,parameters,Fl,dHat,graph,'outputEnabled');
+%graph.index = plot_postprocIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,homDOFs,parameters,Fl,dHat,graph,'outputEnabled');
 
 % Compute the relative error in the L2-norm for the stress resultant
 [errorCurvedBeamTipShear,minElArea] = computeRelErrorL2CurvedBeamTipShearIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,parameters,internalRadius,externalRadius,abs(FAmp),dHat,error,'outputEnabled');
