@@ -184,7 +184,7 @@ end
 % parameters2.t = 1;
 
 %Penalty Term
-Beta = 1e7;
+Beta = 1e9;
 
 %% GUI
 
@@ -199,8 +199,8 @@ bodyForcesIGA = @computeConstantVecrticalBodyForceVct;
 
 % On the numerical integration
 % 'default', 'manual'
-intLoad.type = 'manual';
-intDomain.type = 'manual';
+intLoad.type = 'default';
+intDomain.type = 'default';
 % Choice of the Gauss Point number
 intLoad.nGP = 1;
 intDomain.nGP = 1;
@@ -244,11 +244,11 @@ graph.postprocConfig = 'referenceCurrent';
 
 % Plot strain or stress field
 % .resultant: 'displacement', 'strain', 'stress'
-graph.resultant = 'stress';
+graph.resultant = 'displacement';
 
 % Component of the resultant to plot
 % .component: 'x', 'y', '2norm','xy', '1Principal', '2Principal'
-graph.component = 'xy';
+graph.component = '2norm';
 
 % error computation for this benchmark
 % .resultant: 'displacement', 'strain', 'stress'
@@ -262,7 +262,7 @@ error.etaNGP = 10;
 %% Refinements
 
 % polynomial order
-a = 2;
+a = 1;
 b = 1;
 
 % 1st patch :
@@ -300,7 +300,7 @@ rb2 = [];
 
 % Load
 Fl2 = [];
-fx = -1e3;
+fx = -1;
 xib = 1;   etab = [0 1];   directionForce=1;
 Fl2 = computeLoadVctLineIGAPlateInMembraneAction(Fl2,xib,etab,p2,q2,Xi2,Eta2,CP2,isNURBS2,fx,directionForce,int2,'outputEnabled');
 % xib = [0 0.5];   etab = 1;   directionForce = 1;
@@ -341,9 +341,19 @@ etacoup2 = [0 1];
     analysis,parameters,nLinearAnalysis,strDynamics,intDomain,caseName,pathToOutput,'outputEnabled');
 
 %% Postprocessing
+noDOFsFEM = length(F);
+homDOFsAndreas = [homDBC homDOFs+noDOFsFEM+1];
+
 % Energy norm
 Energynorm=dHat'*K*dHat;
 Energynorm=sqrt(0.5*Energynorm);
+
+Kred = K;
+Kred(homDOFsAndreas,:) = [];
+Kred(:,homDOFsAndreas) = [];
+ maxEigenValue = max(eigs(Kred));
+ minEigenValue = min(eigs(Kred,6,'sm'));
+ conditionNumber = maxEigenValue/minEigenValue;
 
 % Plotting
 graph.visualization.geometry = 'reference_and_current';

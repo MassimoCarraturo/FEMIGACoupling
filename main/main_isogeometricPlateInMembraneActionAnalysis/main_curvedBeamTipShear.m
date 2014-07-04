@@ -164,14 +164,14 @@ bodyForces = @computeConstantVecrticalBodyForceVct;
 %% Refinement 
 
 % Degree elevation of the surface
-a = 0;
+a = 5;
 tp = a;  tq = a;
 [Xi,Eta,CP,p,q] = degreeElevateBSplineSurface(p,q,Xi,Eta,CP,tp,tq,'outputEnabled');
 
 % Knot insertion on the surface
-a = 2;
-refXi = ceil(25*a);
-refEta = ceil(7*a);
+a = 8;
+refXi = ceil(4*a);
+refEta = ceil(1*a);
 [Xi,Eta,CP] = knotRefineUniformlyBSplineSurface(p,Xi,q,Eta,CP,refXi,refEta,'outputEnabled');
 
 %% Dirichlet and Neumann boundary conditions 
@@ -212,6 +212,6 @@ Energynorm=sqrt(0.5*Energynorm);
 %graph.index = plot_postprocIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,homDOFs,parameters,Fl,dHat,graph,'outputEnabled');
 
 % Compute the relative error in the L2-norm for the stress resultant
-[errorCurvedBeamTipShear,minElArea] = computeRelErrorL2CurvedBeamTipShearIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,parameters,internalRadius,externalRadius,abs(FAmp),dHat,error,'outputEnabled');
+%[errorCurvedBeamTipShear,minElArea] = computeRelErrorL2CurvedBeamTipShearIGAPlateInMembraneAction(p,q,Xi,Eta,CP,isNURBS,parameters,internalRadius,externalRadius,abs(FAmp),dHat,error,'outputEnabled');
 
 %% End of the scrpit
