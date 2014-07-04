@@ -336,11 +336,16 @@ etacoup2 = [0 1];
 
 
 %% Solve the system
-[dHat,FComplete,minElSize] = solve_IGA_FEM_PlateInMembraneActionLinear(Beta,XiB,p2,Xi2,q2,Eta2,CP2,isNURBS2,parameters,Fl2,bodyForcesIGA,homDOFs,...
+[dHat,FComplete,minElSize,K] = solve_IGA_FEM_PlateInMembraneActionLinear(Beta,XiB,p2,Xi2,q2,Eta2,CP2,isNURBS2,parameters,Fl2,bodyForcesIGA,homDOFs,...
     inhomDOFs,valuesInhomDOFs,int2,'outputEnabled',strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,F,bodyForcesFEM,...
     analysis,parameters,nLinearAnalysis,strDynamics,intDomain,caseName,pathToOutput,'outputEnabled');
 
 %% Postprocessing
+% Energy norm
+Energynorm=dHat'*K*dHat;
+Energynorm=sqrt(0.5*Energynorm);
+
+% Plotting
 graph.visualization.geometry = 'reference_and_current';
 noDOFsFEM = length(strMsh.nodes(:,1))*2;
 graph.index = plot_FEM_IGA_currentConfigurationAndResultants(p2,q2,Xi2,Eta2,CP2,isNURBS2,homDOFs,parameters,Fl2,dHat(noDOFsFEM+1:length(dHat)),graph,'outputEnabled',...
