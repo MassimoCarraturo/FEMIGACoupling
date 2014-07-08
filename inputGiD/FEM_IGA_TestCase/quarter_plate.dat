@@ -516,27 +516,27 @@ STRUCTURE_DIRICHLET_NODES
      165 0.0  NaN  NaN  
      167 0.0  NaN  NaN  
 STRUCTURE_FORCE_NODES
-       1 boundaryLoad functionHandle
-       2 boundaryLoad functionHandle
-       4 boundaryLoad functionHandle
-       7 boundaryLoad functionHandle
-      10 boundaryLoad functionHandle
-      12 boundaryLoad functionHandle
-      16 boundaryLoad functionHandle
-      20 boundaryLoad functionHandle
-      25 boundaryLoad functionHandle
-      29 boundaryLoad functionHandle
-      36 boundaryLoad functionHandle
-      42 boundaryLoad functionHandle
-      49 boundaryLoad functionHandle
-      57 boundaryLoad functionHandle
-      64 boundaryLoad functionHandle
-      73 boundaryLoad functionHandle
-      80 boundaryLoad functionHandle
-      88 boundaryLoad functionHandle
-      97 boundaryLoad functionHandle
-     107 boundaryLoad functionHandle
-     119 boundaryLoad functionHandle
+       1 boundaryLoad computeNeumannForQuarterPlate
+       2 boundaryLoad computeNeumannForQuarterPlate
+       4 boundaryLoad computeNeumannForQuarterPlate
+       7 boundaryLoad computeNeumannForQuarterPlate
+      10 boundaryLoad computeNeumannForQuarterPlate
+      12 boundaryLoad computeNeumannForQuarterPlate    
+      16 boundaryLoad computeNeumannForQuarterPlate
+      20 boundaryLoad computeNeumannForQuarterPlate
+      25 boundaryLoad computeNeumannForQuarterPlate
+      29 boundaryLoad computeNeumannForQuarterPlate
+      36 boundaryLoad computeNeumannForQuarterPlate
+      42 boundaryLoad computeNeumannForQuarterPlate
+      49 boundaryLoad computeNeumannForQuarterPlate
+      57 boundaryLoad computeNeumannForQuarterPlate
+      64 boundaryLoad computeNeumannForQuarterPlate
+      73 boundaryLoad computeNeumannForQuarterPlate
+      80 boundaryLoad computeNeumannForQuarterPlate
+      88 boundaryLoad computeNeumannForQuarterPlate
+      97 boundaryLoad computeNeumannForQuarterPlate
+     107 boundaryLoad computeNeumannForQuarterPlate
+     119 boundaryLoad computeNeumannForQuarterPlate
 STRUCTURE_INTERFACE_NODES
        1 boundary
        3 boundary

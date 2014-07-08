@@ -86,7 +86,7 @@ addpath('../../isogeometricPlateInMembraneActionAnalysis/stiffnessMatrices/',...
 % This is modelled with the classical Finite Elements
 % Define the path to the case
 pathToCase = '../../inputGiD/FEM_IGA_TestCase/';
-caseName = 'quarter_plate';
+caseName = 'quarterPlate2';
 
 % Parse the data from the GiD input file
 [strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,analysis,parameters,nLinearAnalysis,strDynamics] = ...
@@ -152,6 +152,9 @@ end
 
 % 1st patch :
 % ___________
+
+% On the body forces
+bodyForcesIGA = @computeConstantVecrticalBodyForceVct;
 
 % Young's modulus
 parameters1.E = 1e5;
@@ -237,7 +240,7 @@ n1 = ceil(3*scale);
 [Xi1,Eta1,CP1] = knotRefineUniformlyBSplineSurface(p1,Xi1,q1,Eta1,CP1,n1,n1,'outputEnabled');
 
 lng = length(Xi1);
-XiB = Xi1(1);
+XiB = Xi1(lng);
 
 %% Dirichlet and Neumann boundary conditions
 
@@ -275,7 +278,9 @@ F = computeLoadVctFEMPlateInMembraneAction(strMsh,analysis,NBC,t,intLoad,'output
 
 % 1st patch :
 % ___________
-
+homDOFs=[];
+inhomDOFs=[];
+valuesInhomDOFs=[];
 
 % 2nd patch :
 % ___________
@@ -296,7 +301,7 @@ etacoup2 = [0 1];
 Beta = 1e9;
 
 %% Solve the system
-[dHat,FComplete,minElSize,K] = solve_IGA_FEM_PlateInMembraneActionLinear(Beta,XiB,p1,Xi1,q1,Eta1,CP1,isNURBS2,parameters,Fl2,bodyForcesIGA,homDOFs,...
+[dHat,FComplete,minElSize,K] = solve_IGA_FEM_PlateInMembraneActionLinear(Beta,XiB,p1,Xi1,q1,Eta1,CP1,isNURBS1,parameters,Fl1,bodyForcesIGA,homDOFs,...
     inhomDOFs,valuesInhomDOFs,int2,'outputEnabled',strMsh,homDBC,inhomDBC,valuesInhomDBC,NBC,IBC,F,bodyForcesFEM,...
     analysis,parameters,nLinearAnalysis,strDynamics,intDomain,caseName,pathToOutput,'outputEnabled');
 
@@ -307,18 +312,18 @@ homDOFsAndreas = [homDBC homDOFs+noDOFsFEM+1];
 % Energy norm
 Energynorm=dHat'*K*dHat;
 Energynorm=sqrt(0.5*Energynorm);
-
-Kred = K;
-Kred(homDOFsAndreas,:) = [];
-Kred(:,homDOFsAndreas) = [];
- maxEigenValue = max(eigs(Kred));
- minEigenValue = min(eigs(Kred,6,'sm'));
- conditionNumber = maxEigenValue/minEigenValue;
+% 
+% Kred = K;
+% Kred(homDOFsAndreas,:) = [];
+% Kred(:,homDOFsAndreas) = [];
+%  maxEigenValue = max(eigs(Kred));
+%  minEigenValue = min(eigs(Kred,6,'sm'));
+%  conditionNumber = maxEigenValue/minEigenValue;
 
 % Plotting
 graph.visualization.geometry = 'reference_and_current';
 noDOFsFEM = length(strMsh.nodes(:,1))*2;
-graph.index = plot_FEM_IGA_currentConfigurationAndResultants(p2,q2,Xi2,Eta2,CP2,isNURBS2,homDOFs,parameters,Fl2,dHat(noDOFsFEM+1:length(dHat)),graph,'outputEnabled',...
+graph.index = plot_FEM_IGA_currentConfigurationAndResultants(p1,q1,Xi1,Eta1,CP1,isNURBS1,homDOFs,parameters,Fl1,dHat(noDOFsFEM+1:length(dHat)),graph,'outputEnabled',...
     strMsh,homDBC,dHat(1:noDOFsFEM),parameters,analysis);
 
 

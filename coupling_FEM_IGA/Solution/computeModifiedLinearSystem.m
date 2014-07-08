@@ -331,6 +331,11 @@ for j = 1:length(Eta_Coupled)-1
                            knot_begin(1,2) = Projected_knots_from_FEM(i,1);
                            knot_end(1,1) = i+1;
                            knot_end(1,2) = Projected_knots_from_FEM(i+1,1);
+                       elseif eta>Projected_knots_from_FEM(i,1) && eta<Projected_knots_from_FEM(i+1,1) 
+                           knot_begin(1,1) = i;
+                           knot_begin(1,2) = Projected_knots_from_FEM(i,1);
+                           knot_end(1,1) = i+1;
+                           knot_end(1,2) = Projected_knots_from_FEM(i+1,1);
                        end
                    end
                    
